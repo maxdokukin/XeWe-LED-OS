@@ -10,44 +10,14 @@ Wifi::Wifi(const char* hostname) {
     delay(100);
 }
 
-bool Wifi::disconnect() {
-    // Issue the disconnect (and optionally erase saved creds)
-    WiFi.disconnect();
-
-    // Wait up to 5 seconds for disconnection
-    unsigned long start = millis();
-    while (WiFi.status() != WL_DISCONNECTED && millis() - start < 5000) {
-        delay(100);
-    }
-
-    // Return whether we succeeded in disconnecting
-    return (WiFi.status() == WL_DISCONNECTED);
-}
-
-std::vector<String> Wifi::get_available_networks() {
-    std::vector<String> nets;
-
-    // Start an async scan (including hidden SSIDs)
-    int n = WiFi.scanNetworks(true, true);
-    while (WiFi.scanComplete() == WIFI_SCAN_RUNNING) {
-        delay(10);
-    }
-    n = WiFi.scanComplete();
-
-    // Collect SSID names
-    for (int i = 0; i < n; ++i) {
-        nets.push_back(WiFi.SSID(i));
-    }
-    WiFi.scanDelete();
-    return nets;
-}
-
-bool Wifi::connect(const String &ssid, const String &password) {
+bool Wifi::connect(const String& ssid, const String& password) {
     WiFi.begin(ssid.c_str(), password.c_str());
-    unsigned long start = millis();
 
-    // Wait up to 10 seconds for connection
-    while (millis() - start < 10000) {
+    unsigned long start_time = millis();
+    constexpr unsigned long timeout_ms = 10'000;  // 10 seconds
+
+    // Wait for connection or timeout
+    while (millis() - start_time < timeout_ms) {
         if (WiFi.status() == WL_CONNECTED) {
             return true;
         }
@@ -56,7 +26,44 @@ bool Wifi::connect(const String &ssid, const String &password) {
     return false;
 }
 
+bool Wifi::disconnect() {
+    WiFi.disconnect();
+
+    unsigned long start_time = millis();
+    constexpr unsigned long timeout_ms = 5'000;  // 5 seconds
+
+    // Wait until fully disconnected or timeout
+    while (WiFi.status() != WL_DISCONNECTED && millis() - start_time < timeout_ms) {
+        delay(100);
+    }
+    return (WiFi.status() == WL_DISCONNECTED);
+}
+
+std::vector<String> Wifi::get_available_networks() {
+    // Start an async scan (including hidden SSIDs)
+    int num_networks = WiFi.scanNetworks(/* async */ true, /* show_hidden */ true);
+
+    // Wait for scan to complete
+    while (WiFi.scanComplete() == WIFI_SCAN_RUNNING) {
+        delay(10);
+    }
+    num_networks = WiFi.scanComplete();
+
+    // Collect SSID names
+    std::vector<String> ssid_list;
+    ssid_list.reserve(num_networks);
+    for (int i = 0; i < num_networks; ++i) {
+        ssid_list.push_back(WiFi.SSID(i));
+    }
+    WiFi.scanDelete();
+
+    return ssid_list;
+}
+
+bool Wifi::is_connected() const {
+    return (WiFi.status() == WL_CONNECTED);
+}
+
 String Wifi::get_local_ip() const {
-    // Convert IPAddress to String "a.b.c.d"
     return WiFi.localIP().toString();
 }

@@ -7,33 +7,33 @@
 
 class CommandParser {
 public:
-    // Allow any callable, including lambdas capturing `this`
-    using CommandFunction = std::function<void(const String& args)>;
+    // Any callable type taking the argument string
+    using command_function_t = std::function<void(const String& args)>;
 
     struct Command {
-        const char*      name;
-        CommandFunction  function;
+        const char*            name;
+        command_function_t     function;
     };
 
     struct CommandGroup {
-        const char*      name;
-        const Command*   commands;
-        size_t           commandCount;
+        const char*            name;
+        const Command*         commands;
+        size_t                 command_count;
     };
 
     CommandParser() = default;
 
-    // Set your groups once...
-    void setGroups(const CommandGroup* groups, size_t groupCount);
+    // Set the available command groups
+    void set_groups(const CommandGroup* groups, size_t group_count);
 
-    // ...then call parse() for each incoming line
-    void parse(const String& inputLine) const;
+    // Parse one incoming line
+    void parse(const String& input_line) const;
 
 private:
-    const CommandGroup* groups     = nullptr;
-    size_t               groupCount = 0;
+    const CommandGroup* groups_       = nullptr;
+    size_t               group_count_ = 0;
 
-    void parseAndExecute(const String& input) const;
+    void parse_and_execute(const String& input) const;
 };
 
 #endif // COMMAND_PARSER_H

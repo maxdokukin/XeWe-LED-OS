@@ -1,10 +1,9 @@
 #include "SerialPort.h"
 
-SerialPort::SerialPort(unsigned long baud)
-  : _baud(baud)
-{
-    Serial.begin(_baud);
-    // give USB-CDC a moment (this is milliseconds, not seconds)
+SerialPort::SerialPort(unsigned long baud_rate)
+    : baud_rate_(baud_rate) {
+    Serial.begin(baud_rate_);
+    // Give USB-CDC a moment (milliseconds)
     delay(1000);
 }
 
@@ -15,56 +14,54 @@ void SerialPort::flush_input() {
     }
 }
 
-void SerialPort::println(const String& msg) {
-    Serial.println(msg);
+void SerialPort::print(const String& message) {
+    Serial.print(message);
 }
 
-void SerialPort::print(const String& msg) {
-    Serial.print(msg);
+void SerialPort::println(const String& message) {
+    Serial.println(message);
 }
 
-bool SerialPort::has_line() {
-      return Serial.available() > 0;
-
+bool SerialPort::has_line() const {
+    return Serial.available() > 0;
 }
 
 String SerialPort::read_line() {
-  // block until we see a newline:
-  String line;
-  while (true) {
-    if (Serial.available()) {
-      char c = Serial.read();
-      yield();
-      if (c == '\n') break;
-      if (c != '\r') line += c;
-    } else {
-      yield();
+    String line;
+    while (true) {
+        if (Serial.available()) {
+            char c = Serial.read();
+            yield();
+            if (c == '\n') {
+                break;
+            }
+            if (c != '\r') {
+                line += c;
+            }
+        } else {
+            yield();
+        }
     }
-  }
-  line.trim();      // void
-  return line;      // now we always return
+    line.trim();
+    return line;
 }
 
-
 String SerialPort::get_string() {
-    // flush any stray bytes before reading
     flush_input();
-
-    // then block for a fresh full line
     return read_line();
 }
 
 int SerialPort::get_int() {
-    String s = get_string();
-    while (s.length() == 0) {
-        s = get_string();
+    String input = get_string();
+    while (input.length() == 0) {
+        input = get_string();
     }
-    return s.toInt();
+    return input.toInt();
 }
 
 bool SerialPort::get_confirmation() {
-    String s = get_string();
-    s.trim();
-    s.toLowerCase();
-    return (s == "y" || s == "yes" || s == "1" || s == "true");
+    String input = get_string();
+    input.trim();
+    input.toLowerCase();
+    return (input == "y" || input == "yes" || input == "1" || input == "true");
 }

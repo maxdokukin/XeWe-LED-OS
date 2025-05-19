@@ -7,16 +7,13 @@
 
 class Memory {
 public:
-    // ctor: total EEPROM size in bytes (default 512)
-    Memory(size_t size = 512);
+    explicit Memory(size_t size = 512);
 
-    // write and read arbitrary strings (max 127 chars)
-    void write_str(const String &key, const String &value);
-    String read_str(const String &key);
+    void write_str(const String& key, const String& value);
+    String read_str(const String& key) const;
 
-    // write/read a single bit within the byte at the key's address
-    void write_bit(const String &key, uint8_t bit, bool value);
-    bool read_bit(const String &key, uint8_t bit);
+    void write_bit(const String& key, uint8_t bit, bool value);
+    bool read_bit(const String& key, uint8_t bit) const;
 };
 
 #endif // MEMORY_H

@@ -14,21 +14,16 @@ public:
     std::vector<String> get_available_networks();
 
     // Attempt to connect; returns true on success
-    bool connect(const String &ssid, const String &password);
+    bool connect(const String& ssid, const String& password);
 
-    // Disconnect from WiFi.
-    // If eraseCredentials is true, stored network info will be cleared.
-    // Returns true if WiFi ends up in WL_DISCONNECTED.
+    // Disconnect from WiFi; returns true when fully disconnected
     bool disconnect();
 
     // Returns whether currently connected
-    bool is_connected() const { return WiFi.status() == WL_CONNECTED; }
+    bool is_connected() const;
 
-    // Returns the local IP address as a String (e.g. "192.168.0.42")
+    // Returns the local IP address as a String ("a.b.c.d")
     String get_local_ip() const;
-
-private:
-    // (No private members needed for this simple wrapper)
 };
 
 #endif // WIFI_H

@@ -1,22 +1,25 @@
-#ifndef SERIALPORT_H
-#define SERIALPORT_H
+#ifndef SERIAL_PORT_H
+#define SERIAL_PORT_H
 
 #include <Arduino.h>
 
 class SerialPort {
 public:
-    SerialPort(unsigned long baud = 115200);
+    explicit SerialPort(unsigned long baud_rate = 115200);
 
-    void println(const String& msg);
-    void print(const String& msg);
+    // Send text without newline
+    void print(const String& message);
 
-    // True if there's a full '\n'-terminated line waiting
-    bool has_line();
+    // Send text with newline
+    void println(const String& message);
 
-    // Blocking: read and return the next line (no '\n', trimmed)
+    // True if there's at least one byte waiting in the buffer
+    bool has_line() const;
+
+    // Blocking: read and return the next '\n'-terminated line (no '\n', trimmed)
     String read_line();
 
-    // Blocking: flush old input and read one line
+    // Blocking: flush old input then read one line
     String get_string();
 
     // Blocking: read one line and parse as integer
@@ -26,10 +29,10 @@ public:
     bool get_confirmation();
 
 private:
-    unsigned long _baud;
+    unsigned long baud_rate_;
 
     // Discard any buffered bytes (e.g. leftover '\n')
     void flush_input();
 };
 
-#endif // SERIALPORT_H
+#endif  // SERIAL_PORT_H

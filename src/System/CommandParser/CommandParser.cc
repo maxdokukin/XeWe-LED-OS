@@ -2,47 +2,52 @@
 #include "CommandParser.h"
 #include <Arduino.h>  // for Serial
 
-void CommandParser::setGroups(const CommandGroup* groupList, size_t count) {
-    groups     = groupList;
-    groupCount = count;
+void CommandParser::set_groups(const CommandGroup* groups, size_t group_count) {
+    groups_      = groups;
+    group_count_ = group_count;
 }
 
-void CommandParser::parse(const String& inputLine) const {
-    parseAndExecute(inputLine);
+void CommandParser::parse(const String& input_line) const {
+    parse_and_execute(input_line);
 }
 
-void CommandParser::parseAndExecute(const String& input) const {
+void CommandParser::parse_and_execute(const String& input) const {
     String line = input;
     line.trim();
 
-    // require a leading '$'
+    // Require leading '$'
     if (!line.startsWith("$")) {
         Serial.println("Error: commands must start with '$'");
         return;
     }
-    // strip off the '$'
+
+    // Strip off the '$'
     line = line.substring(1);
     line.trim();
 
-    int sp1 = line.indexOf(' ');
-    if (sp1 < 0) {
+    // Split off the group name
+    int space_idx = line.indexOf(' ');
+    if (space_idx < 0) {
         Serial.println("Usage: $<group> <command> [args...]");
         return;
     }
 
-    String grp  = line.substring(0, sp1);
-    String rest = line.substring(sp1 + 1);
+    String group_name = line.substring(0, space_idx);
+    String rest       = line.substring(space_idx + 1);
     rest.trim();
 
-    int sp2     = rest.indexOf(' ');
-    String cmd  = (sp2 < 0 ? rest : rest.substring(0, sp2));
-    String args = (sp2 < 0 ? String() : rest.substring(sp2 + 1));
+    // Split off the command name
+    int space_idx2    = rest.indexOf(' ');
+    String command    = (space_idx2 < 0 ? rest : rest.substring(0, space_idx2));
+    String arguments  = (space_idx2 < 0 ? String() : rest.substring(space_idx2 + 1));
 
-    for (size_t i = 0; i < groupCount; ++i) {
-        if (grp.equalsIgnoreCase(groups[i].name)) {
-            for (size_t j = 0; j < groups[i].commandCount; ++j) {
-                if (cmd.equalsIgnoreCase(groups[i].commands[j].name)) {
-                    groups[i].commands[j].function(args);
+    // Find and execute
+    for (size_t i = 0; i < group_count_; ++i) {
+        if (group_name.equalsIgnoreCase(groups_[i].name)) {
+            for (size_t j = 0; j < groups_[i].command_count; ++j) {
+                const Command& cmd = groups_[i].commands[j];
+                if (command.equalsIgnoreCase(cmd.name)) {
+                    cmd.function(arguments);
                     return;
                 }
             }
