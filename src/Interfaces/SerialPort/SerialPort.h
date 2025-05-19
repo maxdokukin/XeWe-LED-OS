@@ -5,7 +5,7 @@
 
 class SerialPort {
 public:
-    // ctor: baud rate (default 115200)
+    // ctor: initialize Serial at given baud (default 115200)
     SerialPort(unsigned long baud = 115200);
 
     // print with newline
@@ -14,17 +14,20 @@ public:
     // print without newline
     void print(const String &msg);
 
-    // read and return the next integer from serial
+    // read a full line from Serial and parse it as int
     int get_int();
 
-    // read until newline and return the resulting string
+    // read a full line (until '\n') from Serial
     String get_string();
 
-    // read a confirmation (“y”/“yes” → true; else false)
+    // read a full line and interpret ["y","yes","1","true"] → true
     bool get_confirmation();
 
 private:
     unsigned long _baud;
+
+    // discard any pending characters in the buffer
+    void flushInput();
 };
 
 #endif // SERIALPORT_H

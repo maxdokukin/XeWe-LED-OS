@@ -17,5 +17,9 @@ public:
 
     // Returns whether currently connected
     bool is_connected() const { return WiFi.status() == WL_CONNECTED; }
+
+    // Returns the local IP address as a String (e.g. "192.168.0.42")
+    String get_local_ip() const;
 };
+
 #endif // WIFI_H

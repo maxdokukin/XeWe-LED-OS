@@ -33,3 +33,9 @@ bool Wifi::connect(const String &ssid, const String &password) {
     }
     return false;
 }
+
+String Wifi::get_local_ip() const {
+    // WiFi.localIP() returns an IPAddress; toString() converts it to "a.b.c.d"
+    return WiFi.localIP().toString();
+}
+
