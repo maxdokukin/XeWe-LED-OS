@@ -5,29 +5,31 @@
 
 class SerialPort {
 public:
-    // ctor: initialize Serial at given baud (default 115200)
     SerialPort(unsigned long baud = 115200);
 
-    // print with newline
-    void println(const String &msg);
+    void println(const String& msg);
+    void print(const String& msg);
 
-    // print without newline
-    void print(const String &msg);
+    // True if there's a full '\n'-terminated line waiting
+    bool has_line();
 
-    // read a full line from Serial and parse it as int
-    int get_int();
+    // Blocking: read and return the next line (no '\n', trimmed)
+    String read_line();
 
-    // read a full line (until '\n') from Serial
+    // Blocking: flush old input and read one line
     String get_string();
 
-    // read a full line and interpret ["y","yes","1","true"] → true
+    // Blocking: read one line and parse as integer
+    int get_int();
+
+    // Blocking: read one line and interpret yes/no
     bool get_confirmation();
 
 private:
     unsigned long _baud;
 
-    // discard any pending characters in the buffer
-    void flushInput();
+    // Discard any buffered bytes (e.g. leftover '\n')
+    void flush_input();
 };
 
 #endif // SERIALPORT_H

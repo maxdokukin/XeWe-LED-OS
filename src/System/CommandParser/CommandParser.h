@@ -1,32 +1,39 @@
+// CommandParser.h
 #ifndef COMMAND_PARSER_H
 #define COMMAND_PARSER_H
 
+#include <Arduino.h>
+#include <functional>
+
 class CommandParser {
 public:
-    typedef void (*CommandFunction)(const String& args);
+    // Allow any callable, including lambdas capturing `this`
+    using CommandFunction = std::function<void(const String& args)>;
 
     struct Command {
-        const char* name;
-        CommandFunction function;
+        const char*      name;
+        CommandFunction  function;
     };
 
     struct CommandGroup {
-        const char* name;
-        const Command* commands;
-        size_t commandCount;
+        const char*      name;
+        const Command*   commands;
+        size_t           commandCount;
     };
 
-    // No streams or buffering here—just set up your groups,
-    // then call parse() on each full line you read.
     CommandParser() = default;
+
+    // Set your groups once...
     void setGroups(const CommandGroup* groups, size_t groupCount);
+
+    // ...then call parse() for each incoming line
     void parse(const String& inputLine) const;
 
 private:
-    const CommandGroup* groups = nullptr;
-    size_t groupCount = 0;
+    const CommandGroup* groups     = nullptr;
+    size_t               groupCount = 0;
 
-    void parseAndExecute(const String& line) const;
+    void parseAndExecute(const String& input) const;
 };
 
 #endif // COMMAND_PARSER_H

@@ -1,4 +1,6 @@
+// CommandParser.cc
 #include "CommandParser.h"
+#include <Arduino.h>  // for Serial
 
 void CommandParser::setGroups(const CommandGroup* groupList, size_t count) {
     groups     = groupList;
@@ -23,9 +25,9 @@ void CommandParser::parseAndExecute(const String& input) const {
     String rest = line.substring(sp1 + 1);
     rest.trim();
 
-    int sp2      = rest.indexOf(' ');
-    String cmd   = (sp2 < 0 ? rest : rest.substring(0, sp2));
-    String args  = (sp2 < 0 ? String() : rest.substring(sp2 + 1));
+    int sp2     = rest.indexOf(' ');
+    String cmd  = (sp2 < 0 ? rest : rest.substring(0, sp2));
+    String args = (sp2 < 0 ? String() : rest.substring(sp2 + 1));
 
     for (size_t i = 0; i < groupCount; ++i) {
         if (grp.equalsIgnoreCase(groups[i].name)) {

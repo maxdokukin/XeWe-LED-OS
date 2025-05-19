@@ -1,51 +1,70 @@
 #include "SerialPort.h"
 
 SerialPort::SerialPort(unsigned long baud)
-    : _baud(baud)
+  : _baud(baud)
 {
     Serial.begin(_baud);
+    // give USB-CDC a moment (this is milliseconds, not seconds)
     delay(2);
 }
 
-void SerialPort::flushInput() {
+void SerialPort::flush_input() {
     while (Serial.available()) {
         Serial.read();
+        yield();
     }
 }
 
-void SerialPort::println(const String &msg) {
+void SerialPort::println(const String& msg) {
     Serial.println(msg);
 }
 
-void SerialPort::print(const String &msg) {
+void SerialPort::print(const String& msg) {
     Serial.print(msg);
 }
 
-String SerialPort::get_string() {
-    // clear any leftover data (e.g. stray '\n')
-    flushInput();
+bool SerialPort::has_line() {
+      return Serial.available() > 0;
 
-    // wait for user to send something ending in '\n'
-    while (!Serial.available()) {}
-    String line = Serial.readStringUntil('\n');
-    // strip trailing \r or spaces
-    line.trim();
-    return line;
+}
+
+String SerialPort::read_line() {
+  // block until we see a newline:
+  String line;
+  while (true) {
+    if (Serial.available()) {
+      char c = Serial.read();
+      yield();
+      if (c == '\n') break;
+      if (c != '\r') line += c;
+    } else {
+      yield();
+    }
+  }
+  line.trim();      // void
+  return line;      // now we always return
+}
+
+
+String SerialPort::get_string() {
+    // flush any stray bytes before reading
+    flush_input();
+
+    // then block for a fresh full line
+    return read_line();
 }
 
 int SerialPort::get_int() {
-    // read a clean line, then convert
-    String line = get_string();
-    // if the user just hit Enter, keep waiting
-    while (line.length() == 0) {
-        line = get_string();
+    String s = get_string();
+    while (s.length() == 0) {
+        s = get_string();
     }
-    return line.toInt();
+    return s.toInt();
 }
 
 bool SerialPort::get_confirmation() {
-    String resp = get_string();
-    // normalize case
-    resp.toLowerCase();
-    return (resp == "y" || resp == "yes" || resp == "1" || resp == "true");
+    String s = get_string();
+    s.trim();
+    s.toLowerCase();
+    return (s == "y" || s == "yes" || s == "1" || s == "true");
 }
