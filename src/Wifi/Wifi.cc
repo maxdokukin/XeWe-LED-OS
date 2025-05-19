@@ -23,6 +23,7 @@ bool Wifi::connect(const String& ssid, const String& password) {
         }
         delay(200);
     }
+    WiFi.disconnect(true);
     return false;
 }
 

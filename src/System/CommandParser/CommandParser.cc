@@ -21,34 +21,57 @@ void CommandParser::parse_and_execute(const String& input) const {
     line = line.substring(1);
     line.trim();
 
-    // Split off the group name
+    // Extract group, command, and arguments
+    String group_name;
+    String command_name;
+    String arguments;
+
     int space_idx = line.indexOf(' ');
     if (space_idx < 0) {
-        Serial.println("Usage: $<group> <command> [args...]");
-        return;
+        // Only group was provided
+        group_name = line;
+    } else {
+        group_name   = line.substring(0, space_idx);
+        String rest  = line.substring(space_idx + 1);
+        rest.trim();
+
+        int space_idx2 = rest.indexOf(' ');
+        if (space_idx2 < 0) {
+            command_name = rest;
+        } else {
+            command_name = rest.substring(0, space_idx2);
+            arguments    = rest.substring(space_idx2 + 1);
+        }
     }
 
-    String group_name = line.substring(0, space_idx);
-    String rest       = line.substring(space_idx + 1);
-    rest.trim();
-
-    // Split off the command name
-    int space_idx2    = rest.indexOf(' ');
-    String command    = (space_idx2 < 0 ? rest : rest.substring(0, space_idx2));
-    String arguments  = (space_idx2 < 0 ? String() : rest.substring(space_idx2 + 1));
-
-    // Find and execute
+    // Find the group
     for (size_t i = 0; i < group_count_; ++i) {
-        if (group_name.equalsIgnoreCase(groups_[i].name)) {
-            for (size_t j = 0; j < groups_[i].command_count; ++j) {
-                const Command& cmd = groups_[i].commands[j];
-                if (command.equalsIgnoreCase(cmd.name)) {
+        const CommandGroup& grp = groups_[i];
+        if (group_name.equalsIgnoreCase(grp.name)) {
+            // If no command given, run the first one (if available)
+            if (command_name.length() == 0) {
+                if (grp.command_count > 0) {
+                    grp.commands[0].function(String());
+                } else {
+                    Serial.println("Error: no commands available for group.");
+                }
+                return;
+            }
+
+            // Otherwise, look for a matching command
+            for (size_t j = 0; j < grp.command_count; ++j) {
+                const Command& cmd = grp.commands[j];
+                if (command_name.equalsIgnoreCase(cmd.name)) {
                     cmd.function(arguments);
                     return;
                 }
             }
+
+            Serial.println("Unknown command in group.");
+            return;
         }
     }
 
-    Serial.println("Unknown command or group.");
+    Serial.println("Unknown command group.");
 }
+

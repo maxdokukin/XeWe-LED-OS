@@ -32,20 +32,23 @@ void System::update() {
 
 // ——— define_commands ———
 void System::define_commands() {
-    wifi_commands[0].name     = "connect";
-    wifi_commands[0].function = [this](const String&) { connect_wifi(); };
+    wifi_commands[0].name     = "help";
+    wifi_commands[0].function = [this](const String&) { print_wifi_help(); };
 
-    wifi_commands[1].name     = "disconnect";
-    wifi_commands[1].function = [this](const String&) { disconnect_wifi(); };
+    wifi_commands[1].name     = "connect";
+    wifi_commands[1].function = [this](const String&) { connect_wifi(); };
 
-    wifi_commands[2].name     = "reset_credentials";
-    wifi_commands[2].function = [this](const String&) { reset_wifi_credentials(); };
+    wifi_commands[2].name     = "disconnect";
+    wifi_commands[2].function = [this](const String&) { disconnect_wifi(); };
 
-    wifi_commands[3].name     = "status";
-    wifi_commands[3].function = [this](const String&) { print_wifi_credentials(); };
+    wifi_commands[3].name     = "reset_credentials";
+    wifi_commands[3].function = [this](const String&) { reset_wifi_credentials(); };
 
-    wifi_commands[4].name     = "scan";
-    wifi_commands[4].function = [this](const String&) {
+    wifi_commands[4].name     = "status";
+    wifi_commands[4].function = [this](const String&) { print_wifi_credentials(); };
+
+    wifi_commands[5].name     = "scan";
+    wifi_commands[5].function = [this](const String&) {
         serial_port.println("Scanning available networks...");
         auto networks = wifi.get_available_networks();
         serial_port.println("Available networks:");
@@ -215,4 +218,15 @@ bool System::reset_wifi_credentials() {
         "Use 'wifi connect' to select a new network."
     );
     return true;
+}
+
+// ——— print_wifi_help ———
+void System::print_wifi_help() {
+    serial_port.println("WiFi commands:");
+    serial_port.println("  $help              - Show this help message");
+    serial_port.println("  $connect           - Connect or reconnect to WiFi");
+    serial_port.println("  $disconnect        - Disconnect from WiFi");
+    serial_port.println("  $reset_credentials - Clear saved WiFi credentials");
+    serial_port.println("  $status            - Show connection status & IP");
+    serial_port.println("  $scan              - List available WiFi networks");
 }

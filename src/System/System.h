@@ -20,6 +20,7 @@ private:
 
     // Wi-Fi flows
     void print_wifi_credentials();
+    void print_wifi_help();
     bool connect_wifi();
     bool read_memory_wifi_credentials(String& ssid, String& pwd);
     bool prompt_user_for_wifi_credentials(String& ssid, String& pwd);
@@ -31,7 +32,7 @@ private:
     Memory                         memory;
     CommandParser                  command_parser;
 
-    static const size_t            WIFI_CMD_COUNT = 5;
+    static const size_t            WIFI_CMD_COUNT = 6;
     CommandParser::Command         wifi_commands[WIFI_CMD_COUNT];
     CommandParser::CommandGroup    wifi_group;
 };
