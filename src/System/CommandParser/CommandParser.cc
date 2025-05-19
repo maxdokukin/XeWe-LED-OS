@@ -15,9 +15,18 @@ void CommandParser::parseAndExecute(const String& input) const {
     String line = input;
     line.trim();
 
+    // require a leading '$'
+    if (!line.startsWith("$")) {
+        Serial.println("Error: commands must start with '$'");
+        return;
+    }
+    // strip off the '$'
+    line = line.substring(1);
+    line.trim();
+
     int sp1 = line.indexOf(' ');
     if (sp1 < 0) {
-        Serial.println("Usage: <group> <command> [args...]");
+        Serial.println("Usage: $<group> <command> [args...]");
         return;
     }
 
