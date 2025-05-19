@@ -19,7 +19,7 @@ public:
     // Disconnect from WiFi.
     // If eraseCredentials is true, stored network info will be cleared.
     // Returns true if WiFi ends up in WL_DISCONNECTED.
-    bool disconnect(bool eraseCredentials = false);
+    bool disconnect();
 
     // Returns whether currently connected
     bool is_connected() const { return WiFi.status() == WL_CONNECTED; }
