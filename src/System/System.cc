@@ -1,3 +1,4 @@
+// System.cpp
 #include "System.h"
 #include <vector>
 
@@ -18,93 +19,37 @@ void System::init_system_setup() {
     connect_wifi();
 }
 
-bool read_memory_wifi_credentials(String* ssid, String *pwd){
-    if(memory.read_bit("wifi_flags", 0)){
-        serialPort.println("Found WiFi credentials in the memory");
+// Command parsing
 
-        String ssid = memory.read_str("wifi_name");
-        String pwd = memory.read_str("wifi_pass");
+void System::update() {
+    command_parser.parse();
 
-        serialPort.print("Connecting to ");
-        serialPort.println(ssid);
-        if (wifi.connect(ssid, pwd)) {
-            serialPort.print("Connected to ");
-            serialPort.println(ssid);
-            serialPort.print("Local ip: ");
-            serialPort.println(wifi.get_local_ip());
-            wifi_connected = true;
-
-            return true;
-        }
-    }
 }
 
-bool enter_wifi_credentials(String* ssid, String *pwd){
-    memory.write_bit("wifi_flags", 0, 1);
-    serialPort.println("Adding new WiFi credentials");
 
-    // 1) Scan & list
-    std::vector<String> networks = wifi.get_available_networks();
-    serialPort.println("Available networks:");
-    serialPort.println("0: Enter custom SSID");
-    for (size_t i = 0; i < networks.size(); ++i) {
-        serialPort.print(String(i + 1) + ": ");
-        serialPort.println(networks[i]);
-    }
-
-    // 2) Ask selection
-    serialPort.println("Select network by number: ");
-    int choice = serialPort.get_int();
-
-    String ssid;
-    if (choice == 0) {
-        bool confirmed = false;
-        while (!confirmed) {
-            serialPort.println("Enter network name: ");
-            ssid = serialPort.get_string();
-            serialPort.println("Confirm network name: ");
-            serialPort.println(ssid);
-            confirmed = serialPort.get_confirmation();
-        }
-    }
-    else if (choice > 0 && choice <= (int)networks.size()) {
-        ssid = networks[choice - 1];
-    }
-    else {
-        serialPort.println("Invalid selection; try again.");
-        continue;
-    }
-
-    // 3) Ask password
-    String pwd;
-    bool pwd_ok = false;
-    while (!pwd_ok) {
-        serialPort.println("Enter network password: ");
-        pwd = serialPort.get_string();
-        serialPort.println("Confirm network password: ");
-        serialPort.println(pwd);
-        pwd_ok = serialPort.get_confirmation();
-    }
-}
-
+// WiFi
 bool System::connect_wifi() {
     String ssid, pwd;
 
-    if(!read_memory_wifi_credentials(&ssid, &pwd))
-        enter_wifi_credentials();
+    // 1) Try stored credentials first
+    if (!read_memory_wifi_credentials(ssid, pwd)) {
+        // No valid stored creds or connect failed → prompt user
+        prompt_user_for_wifi_credentials(ssid, pwd);
+    }
 
     while (!wifi_connected) {
         serialPort.print("Connecting to ");
         serialPort.println(ssid);
 
-        // 4) Attempt connect
+        // Attempt connect
         if (wifi.connect(ssid, pwd)) {
             serialPort.print("Connected to ");
             serialPort.println(ssid);
             serialPort.print("Local ip: ");
             serialPort.println(wifi.get_local_ip());
 
-            memory.write_bit("wifi_flags", 0, 1); //set wifi config exists flag
+            // Store for next boot
+            memory.write_bit("wifi_flags", 0, 1);
             memory.write_str("wifi_name", ssid);
             memory.write_str("wifi_pass", pwd);
             wifi_connected = true;
@@ -114,8 +59,80 @@ bool System::connect_wifi() {
             serialPort.print("Failed to connect to ");
             serialPort.println(ssid);
             serialPort.println("Let's try again.");
-            enter_wifi_credentials();
+            prompt_user_for_wifi_credentials(ssid, pwd);
         }
     }
-    return false;  // never reached, but placates the compiler
+    return false;  // never reached
+}
+
+bool System::read_memory_wifi_credentials(String& ssid, String& pwd) {
+    if (!memory.read_bit("wifi_flags", 0)) {
+        return false;
+    }
+    serialPort.println("Found saved WiFi credentials");
+    ssid = memory.read_str("wifi_name");
+    pwd  = memory.read_str("wifi_pass");
+
+    serialPort.print("Connecting to ");
+    serialPort.println(ssid);
+    if (wifi.connect(ssid, pwd)) {
+        serialPort.print("Connected to ");
+        serialPort.println(ssid);
+        serialPort.print("Local ip: ");
+        serialPort.println(wifi.get_local_ip());
+        wifi_connected = true;
+        return true;
+    }
+    // Saved creds were bad
+    serialPort.println("Stored credentials failed; discarding.");
+    return false;
+}
+
+bool System::prompt_user_for_wifi_credentials(String& ssid, String& pwd) {
+    // Clear old flag so we know to save new ones
+    memory.write_bit("wifi_flags", 0, 0);
+    serialPort.println("Please enter new WiFi credentials:");
+
+    // 1) Scan & list
+    auto networks = wifi.get_available_networks();
+    serialPort.println("Available networks:");
+    serialPort.println("0: Enter custom SSID");
+    for (size_t i = 0; i < networks.size(); ++i) {
+        serialPort.print(String(i + 1) + ": ");
+        serialPort.println(networks[i]);
+    }
+
+    // 2) Ask selection
+    serialPort.println("Select network number:");
+    int choice = serialPort.get_int();
+    if (choice == 0) {
+        bool ok = false;
+        while (!ok) {
+            serialPort.println("Enter SSID:");
+            ssid = serialPort.get_string();
+            serialPort.print("Confirm SSID: ");
+            serialPort.println(ssid);
+            ok = serialPort.get_confirmation();
+        }
+    }
+    else if (choice > 0 && choice <= (int)networks.size()) {
+        ssid = networks[choice - 1];
+    }
+    else {
+        serialPort.println("Invalid choice. Aborting entry.");
+        return false;
+    }
+
+    // 3) Ask password
+    {
+        bool ok = false;
+        while (!ok) {
+            serialPort.println("Enter password:");
+            pwd = serialPort.get_string();
+            serialPort.print("Confirm password: ");
+            serialPort.println(pwd);
+            ok = serialPort.get_confirmation();
+        }
+    }
+    return true;
 }
