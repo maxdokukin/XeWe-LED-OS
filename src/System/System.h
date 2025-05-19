@@ -29,7 +29,6 @@ private:
     SerialPort                     serial_port;
     Wifi                           wifi;
     Memory                         memory;
-    bool                           wifi_connected = false;
     CommandParser                  command_parser;
 
     static const size_t            WIFI_CMD_COUNT = 5;

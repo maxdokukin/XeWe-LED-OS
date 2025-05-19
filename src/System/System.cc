@@ -3,10 +3,9 @@
 
 // ——— System ctor ———
 System::System()
-    : serial_port(115200)
-    , wifi("ESP32-C3-Device")
-    , memory(512)
-    , wifi_connected(false)
+  : serial_port(115200)
+  , wifi("ESP32-C3-Device")
+  , memory(512)
 {}
 
 // ——— init_system_setup ———
@@ -15,7 +14,9 @@ void System::init_system_setup() {
     serial_port.println("This is a complete OS solution to control the addressable LED lights.");
     serial_port.println("Communication supported: serial port");
     serial_port.println("Communication to be supported: Webserver, Alexa, Homekit, Yandex-Alisa");
+
     define_commands();
+
     serial_port.println("Let's connect to WiFi:");
     connect_wifi();
 }
@@ -31,35 +32,19 @@ void System::update() {
 
 // ——— define_commands ———
 void System::define_commands() {
-    // connect
     wifi_commands[0].name     = "connect";
-    wifi_commands[0].function = [this](const String&) {
-        connect_wifi();
-    };
+    wifi_commands[0].function = [this](const String&) { connect_wifi(); };
 
-    // disconnect
     wifi_commands[1].name     = "disconnect";
-    wifi_commands[1].function = [this](const String&) {
-        disconnect_wifi();
-    };
+    wifi_commands[1].function = [this](const String&) { disconnect_wifi(); };
 
-    // reset credentials
     wifi_commands[2].name     = "reset_credentials";
-    wifi_commands[2].function = [this](const String&) {
-        reset_wifi_credentials();
-    };
+    wifi_commands[2].function = [this](const String&) { reset_wifi_credentials(); };
 
-    // status
     wifi_commands[3].name     = "status";
-    wifi_commands[3].function = [this](const String&) {
-        if (wifi_connected) {
-            print_wifi_credentials();
-        } else {
-            serial_port.println("WiFi not connected");
-        }
+    wifi_commands[3].function = [this](const String&) { print_wifi_credentials(); };
     };
 
-    // scan
     wifi_commands[4].name     = "scan";
     wifi_commands[4].function = [this](const String&) {
         serial_port.println("Scanning available networks...");
@@ -71,58 +56,72 @@ void System::define_commands() {
         }
     };
 
-    // register group
-    wifi_group.name         = "wifi";
-    wifi_group.commands     = wifi_commands;
-    wifi_group.command_count = WIFI_CMD_COUNT;
+    wifi_group.name          = "wifi";
+    wifi_group.commands      = wifi_commands;
+    wifi_group.commandCount  = WIFI_CMD_COUNT;
     command_parser.set_groups(&wifi_group, 1);
 }
 
 // ——— connect_wifi ———
 bool System::connect_wifi() {
     String ssid, pwd;
-    if (wifi_connected){
+
+    if (wifi.is_connected()) {
         serial_port.println("Already connected.");
         print_wifi_credentials();
-        serial_port.println("Use '$wifi reset_credentials' to change the network.");
+        serial_port.println("Use 'wifi reset_credentials' to change network.");
         return true;
     }
 
+    // either load or prompt
     if (!read_memory_wifi_credentials(ssid, pwd)) {
-        prompt_user_for_wifi_credentials(ssid, pwd);
+        if (!prompt_user_for_wifi_credentials(ssid, pwd)) {
+            serial_port.println("WiFi setup aborted by user.");
+            return false;
+        }
     }
 
-    while (!wifi_connected) {
-        serial_port.print("Connecting to ");
-        serial_port.println(ssid);
+    // attempt loop
+    while (!wifi.is_connected()) {
+        serial_port.print("Connecting to '");
+        serial_port.print(ssid);
+        serial_port.println("'...");
+        serial_port.print("Password length: ");
+        serial_port.println(String(pwd.length()));
 
         if (wifi.connect(ssid, pwd)) {
             print_wifi_credentials();
-
             memory.write_bit("wifi_flags", 0, 1);
             memory.write_str("wifi_name", ssid);
             memory.write_str("wifi_pass", pwd);
-
-            wifi_connected = true;
             return true;
         }
 
-        serial_port.print("Failed to connect to ");
-        serial_port.println(ssid);
+        serial_port.print("Failed to connect to '");
+        serial_port.print(ssid);
+        serial_port.println("'.");
         serial_port.println("Let's try again.");
-        prompt_user_for_wifi_credentials(ssid, pwd);
+
+        if (!prompt_user_for_wifi_credentials(ssid, pwd)) {
+            serial_port.println("WiFi setup aborted by user.");
+            return false;
+        }
     }
 
     return false;
 }
 
-void System::print_wifi_credentials(){
-    if (wifi_connected) {
-        serial_port.print("Connected to ");
-        serial_port.println(memory.read_str("wifi_name"));
-        serial_port.print("Local ip: ");
-        serial_port.println(wifi.get_local_ip());
+// ——— print_wifi_credentials ———
+void System::print_wifi_credentials() {
+    if(!wifi.is_connected()){
+        serial_port.println("WiFi not connected");
+        return;
     }
+
+    serial_port.print("Connected to ");
+    serial_port.println(memory.read_str("wifi_name"));
+    serial_port.print("Local ip: ");
+    serial_port.println(wifi.get_local_ip());
 }
 
 // ——— read_memory_wifi_credentials ———
@@ -135,16 +134,12 @@ bool System::read_memory_wifi_credentials(String& ssid, String& pwd) {
     ssid = memory.read_str("wifi_name");
     pwd  = memory.read_str("wifi_pass");
 
-    serial_port.print("Connecting to ");
-    serial_port.println(ssid);
+    serial_port.print("Connecting to '");
+    serial_port.print(ssid);
+    serial_port.println("'...");
 
     if (wifi.connect(ssid, pwd)) {
-        serial_port.print("Connected to ");
-        serial_port.println(ssid);
-        serial_port.print("Local ip: ");
-        serial_port.println(wifi.get_local_ip());
-
-        wifi_connected = true;
+        print_wifi_credentials();
         return true;
     }
 
@@ -155,8 +150,10 @@ bool System::read_memory_wifi_credentials(String& ssid, String& pwd) {
 // ——— prompt_user_for_wifi_credentials ———
 bool System::prompt_user_for_wifi_credentials(String& ssid, String& pwd) {
     memory.write_bit("wifi_flags", 0, 0);
-    serial_port.println("Scanning available networks");
+
+    serial_port.println("Scanning available networks...");
     auto networks = wifi.get_available_networks();
+
     serial_port.println("Available networks:");
     serial_port.println("0: Enter custom SSID");
     for (size_t i = 0; i < networks.size(); ++i) {
@@ -168,13 +165,13 @@ bool System::prompt_user_for_wifi_credentials(String& ssid, String& pwd) {
     int choice = serial_port.get_int();
 
     if (choice == 0) {
-        bool ok = false;
-        while (!ok) {
+        bool confirmed = false;
+        while (!confirmed) {
             serial_port.println("Enter SSID:");
             ssid = serial_port.get_string();
             serial_port.print("Confirm SSID: ");
             serial_port.println(ssid);
-            ok = serial_port.get_confirmation();
+            confirmed = serial_port.get_confirmation();
         }
     }
     else if (choice > 0 && choice <= (int)networks.size()) {
@@ -185,23 +182,23 @@ bool System::prompt_user_for_wifi_credentials(String& ssid, String& pwd) {
         return false;
     }
 
-    serial_port.print("Enter password for ");
-    serial_port.println(ssid);
+    // get password once
+    serial_port.print("Enter password for '");
+    serial_port.print(ssid);
+    serial_port.println("':");
     pwd = serial_port.get_string();
-    serial_port.println(pwd);
 
     return true;
 }
 
 // ——— disconnect_wifi ———
 bool System::disconnect_wifi() {
-    if (!wifi_connected) {
+    if (!wifi.is_connected()) {
         serial_port.println("Not currently connected to WiFi.");
         return false;
     }
 
     wifi.disconnect();
-    wifi_connected = false;
     serial_port.println("Disconnected from WiFi.");
     return true;
 }
@@ -212,14 +209,13 @@ bool System::reset_wifi_credentials() {
     memory.write_str("wifi_name", "");
     memory.write_str("wifi_pass", "");
 
-    if (wifi_connected) {
+    if (wifi.is_connected()) {
         wifi.disconnect();
-        wifi_connected = false;
     }
 
     serial_port.println(
         "WiFi credentials have been reset. "
-        "Use '$wifi connect' to select new network"
+        "Use 'wifi connect' to select a new network."
     );
     return true;
 }
