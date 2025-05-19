@@ -27,6 +27,9 @@ public:
 
     // Returns the SSID of the currently connected network (empty if none)
     String get_ssid() const;
+
+    // Returns the MAC address of the WiFi interface ("AA:BB:CC:DD:EE:FF")
+    String get_mac_address() const;
 };
 
 #endif // WIFI_H

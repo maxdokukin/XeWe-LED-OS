@@ -48,15 +48,7 @@ void System::define_commands() {
     wifi_commands[4].function = [this](const String&) { print_wifi_credentials(); };
 
     wifi_commands[5].name     = "scan";
-    wifi_commands[5].function = [this](const String&) {
-        serial_port.println("Scanning available networks...");
-        auto networks = wifi.get_available_networks();
-        serial_port.println("Available networks:");
-        for (size_t i = 0; i < networks.size(); ++i) {
-            serial_port.print(String(i + 1) + ": ");
-            serial_port.println(networks[i]);
-        }
-    };
+    wifi_commands[5].function = [this](const String&) { get_available_wifi_networks(); };
 
     wifi_group.name          = "wifi";
     wifi_group.commands      = wifi_commands;
@@ -122,6 +114,8 @@ void System::print_wifi_credentials() {
     serial_port.println(wifi.get_ssid());
     serial_port.print("Local ip: ");
     serial_port.println(wifi.get_local_ip());
+    serial_port.print("MAC: ");
+    serial_port.println(wifi.get_mac_address());
 }
 
 // ——— read_memory_wifi_credentials ———
@@ -151,16 +145,7 @@ bool System::read_memory_wifi_credentials(String& ssid, String& pwd) {
 bool System::prompt_user_for_wifi_credentials(String& ssid, String& pwd) {
     memory.write_bit("wifi_flags", 0, 0);
 
-    serial_port.println("Scanning available networks...");
-    auto networks = wifi.get_available_networks();
-
-    serial_port.println("Available networks:");
-    serial_port.println("0: Enter custom SSID");
-    for (size_t i = 0; i < networks.size(); ++i) {
-        serial_port.print(String(i + 1) + ": ");
-        serial_port.println(networks[i]);
-    }
-
+    std::vector<String> networks = get_available_wifi_networks();
     serial_port.println("Select network by number:");
     int choice = serial_port.get_int();
 
@@ -182,7 +167,6 @@ bool System::prompt_user_for_wifi_credentials(String& ssid, String& pwd) {
         return false;
     }
 
-    // get password once
     serial_port.print("Enter password for '");
     serial_port.print(ssid);
     serial_port.println("':");
@@ -218,6 +202,18 @@ bool System::reset_wifi_credentials() {
         "Use 'wifi connect' to select a new network."
     );
     return true;
+}
+
+std::vector<String> System::get_available_wifi_networks(){
+    serial_port.println("Scanning available networks...");
+    std::vector<String> networks = wifi.get_available_networks();
+    serial_port.println("Available networks:");
+    serial_port.println("0: Enter custom SSID");
+    for (size_t i = 0; i < networks.size(); ++i) {
+        serial_port.print(String(i + 1) + ": ");
+        serial_port.println(networks[i]);
+    }
+    return networks;
 }
 
 // ——— print_wifi_help ———

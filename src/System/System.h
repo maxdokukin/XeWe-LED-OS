@@ -21,6 +21,8 @@ private:
     // Wi-Fi flows
     void print_wifi_credentials();
     void print_wifi_help();
+    std::vector<String> get_available_wifi_networks();
+
     bool connect_wifi();
     bool read_memory_wifi_credentials(String& ssid, String& pwd);
     bool prompt_user_for_wifi_credentials(String& ssid, String& pwd);

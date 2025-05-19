@@ -60,6 +60,7 @@ int SerialPort::get_int() {
 }
 
 bool SerialPort::get_confirmation() {
+    print("Press (y) to confirm");
     String input = get_string();
     input.trim();
     input.toLowerCase();
