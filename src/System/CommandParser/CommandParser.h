@@ -1,36 +1,32 @@
-#ifndef COMMANDPARSER_H
-#define COMMANDPARSER_H
+#ifndef COMMAND_PARSER_H
+#define COMMAND_PARSER_H
 
 class CommandParser {
 public:
-    typedef void (*CommandFunction)(String args);
+    typedef void (*CommandFunction)(const String& args);
 
     struct Command {
         const char* name;
-        CommandFunction func;
+        CommandFunction function;
     };
 
     struct CommandGroup {
-        const char* groupName;
+        const char* name;
         const Command* commands;
         size_t commandCount;
     };
 
-    CommandParser();
-    void begin(Stream& inputStream);
-    void update(); // Call this in loop()
-
+    // No streams or buffering here—just set up your groups,
+    // then call parse() on each full line you read.
+    CommandParser() = default;
     void setGroups(const CommandGroup* groups, size_t groupCount);
+    void parse(const String& inputLine) const;
 
 private:
-    Stream* stream;
-    String buffer;
+    const CommandGroup* groups = nullptr;
+    size_t groupCount = 0;
 
-    const CommandGroup* groups;
-    size_t groupCount;
-
-    void handleLine(String line);
-    void executeCommand(const String& group, const String& command, const String& args);
+    void parseAndExecute(const String& line) const;
 };
 
-#endif
+#endif // COMMAND_PARSER_H

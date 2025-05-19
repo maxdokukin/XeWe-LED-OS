@@ -1,58 +1,42 @@
 #include "CommandParser.h"
 
-CommandParser::CommandParser()
-    : stream(nullptr), groups(nullptr), groupCount(0) {}
-
-void CommandParser::begin(Stream& inputStream) {
-    this->stream = &inputStream;
-    buffer = "";
+void CommandParser::setGroups(const CommandGroup* groupList, size_t count) {
+    groups     = groupList;
+    groupCount = count;
 }
 
-void CommandParser::setGroups(const CommandGroup* groups, size_t groupCount) {
-    this->groups = groups;
-    this->groupCount = groupCount;
+void CommandParser::parse(const String& inputLine) const {
+    parseAndExecute(inputLine);
 }
 
-void CommandParser::update() {
-    while (stream && stream->available()) {
-        char c = stream->read();
-        if (c == '\n') {
-            handleLine(buffer);
-            buffer = "";
-        } else if (c != '\r') {
-            buffer += c;
-        }
-    }
-}
-
-void CommandParser::handleLine(String line) {
+void CommandParser::parseAndExecute(const String& input) const {
+    String line = input;
     line.trim();
-    int space1 = line.indexOf(' ');
-    if (space1 == -1) {
-        stream->println("Usage: <group> <command> [args]");
+
+    int sp1 = line.indexOf(' ');
+    if (sp1 < 0) {
+        Serial.println("Usage: <group> <command> [args...]");
         return;
     }
 
-    String group = line.substring(0, space1);
-    line = line.substring(space1 + 1).trim();
+    String grp  = line.substring(0, sp1);
+    String rest = line.substring(sp1 + 1);
+    rest.trim();
 
-    int space2 = line.indexOf(' ');
-    String command = (space2 == -1) ? line : line.substring(0, space2);
-    String args = (space2 == -1) ? "" : line.substring(space2 + 1);
+    int sp2      = rest.indexOf(' ');
+    String cmd   = (sp2 < 0 ? rest : rest.substring(0, sp2));
+    String args  = (sp2 < 0 ? String() : rest.substring(sp2 + 1));
 
-    executeCommand(group, command, args);
-}
-
-void CommandParser::executeCommand(const String& group, const String& command, const String& args) {
     for (size_t i = 0; i < groupCount; ++i) {
-        if (group.equalsIgnoreCase(groups[i].groupName)) {
+        if (grp.equalsIgnoreCase(groups[i].name)) {
             for (size_t j = 0; j < groups[i].commandCount; ++j) {
-                if (command.equalsIgnoreCase(groups[i].commands[j].name)) {
-                    groups[i].commands[j].func(args);
+                if (cmd.equalsIgnoreCase(groups[i].commands[j].name)) {
+                    groups[i].commands[j].function(args);
                     return;
                 }
             }
         }
     }
-    stream->println("Unknown command or group.");
+
+    Serial.println("Unknown command or group.");
 }
