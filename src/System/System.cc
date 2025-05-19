@@ -55,7 +55,9 @@ void System::define_commands() {
     wifiCommands[3].name = "status";
     wifiCommands[3].function = [this](const String&) {
         if (wifi_connected) {
-            serialPort.print("Connected. IP: ");
+            serialPort.print("Connected to ");
+            serialPort.println(memory.read_str("wifi_name"));
+            serialPort.print("Local ip: ");
             serialPort.println(wifi.get_local_ip());
         } else {
             serialPort.println("WiFi not connected");
