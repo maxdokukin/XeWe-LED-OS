@@ -28,7 +28,7 @@ public:
     // Blocking: read one line and interpret yes/no
     bool get_confirmation();
 
-    void print_dash_line();
+    void print_spacer();
 private:
     unsigned long baud_rate_;
 

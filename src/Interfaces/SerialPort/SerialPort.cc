@@ -4,7 +4,7 @@ SerialPort::SerialPort(unsigned long baud_rate)
     : baud_rate_(baud_rate) {
     Serial.begin(baud_rate_);
     // Give USB-CDC a moment (milliseconds)
-    delay(1000);
+    delay(1500);
 }
 
 void SerialPort::flush_input() {
@@ -67,6 +67,6 @@ bool SerialPort::get_confirmation() {
     return (input == "y" || input == "yes" || input == "1" || input == "true");
 }
 
-void SerialPort::print_dash_line(){
-    println("");
+void SerialPort::print_spacer(){
+    print("\n");
 }
