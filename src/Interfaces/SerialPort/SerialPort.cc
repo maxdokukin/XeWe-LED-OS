@@ -5,7 +5,7 @@ SerialPort::SerialPort(unsigned long baud)
 {
     Serial.begin(_baud);
     // give USB-CDC a moment (this is milliseconds, not seconds)
-    delay(2);
+    delay(1000);
 }
 
 void SerialPort::flush_input() {

@@ -16,14 +16,44 @@ void System::init_system_setup() {
     serialPort.println("Communication supported: serial port");
     serialPort.println("Communication to be supported: Webserver, Alexa, Homekit, Yandex-Alisa");
 
-    // Explicitly assign each command’s fields
+    define_commands();
+
+    serialPort.println("Let's connect to WiFi:");
+    connect_wifi();
+}
+
+// ——— update() ———
+void System::update() {
+    if (serialPort.has_line()) {
+        String line = serialPort.read_line();
+        serialPort.println(line);
+        command_parser.parse(line);
+    }
+}
+
+// ——— define system commands ———
+void System::define_commands() {
+    // connect
     wifiCommands[0].name = "connect";
     wifiCommands[0].function = [this](const String&) {
         connect_wifi();
     };
 
-    wifiCommands[1].name = "status";
+    // disconnect
+    wifiCommands[1].name = "disconnect";
     wifiCommands[1].function = [this](const String&) {
+        disconnect_wifi();
+    };
+
+    // reset credentials
+    wifiCommands[2].name = "reset_credentials";
+    wifiCommands[2].function = [this](const String&) {
+        reset_wifi_credentials();
+    };
+
+    // status
+    wifiCommands[3].name = "status";
+    wifiCommands[3].function = [this](const String&) {
         if (wifi_connected) {
             serialPort.print("Connected. IP: ");
             serialPort.println(wifi.get_local_ip());
@@ -32,8 +62,9 @@ void System::init_system_setup() {
         }
     };
 
-    wifiCommands[2].name = "scan";
-    wifiCommands[2].function = [this](const String&) {
+    // scan
+    wifiCommands[4].name = "scan";
+    wifiCommands[4].function = [this](const String&) {
         auto networks = wifi.get_available_networks();
         serialPort.println("Available networks:");
         serialPort.println("0: Enter custom SSID");
@@ -49,24 +80,37 @@ void System::init_system_setup() {
     wifiGroup.commandCount = WIFI_CMD_COUNT;
 
     command_parser.setGroups(&wifiGroup, 1);
-
-//    serialPort.println("Commands: wifi connect | wifi status | wifi scan");
-//    serialPort.println("Or later run 'wifi connect' to (re)enter credentials.");
-    serialPort.println("Let's connect to WiFi:");
-    // Optionally auto-connect on startup
-    connect_wifi();
 }
 
-// ——— update() ———
-void System::update() {
-    if (serialPort.has_line()) {
-        String line = serialPort.read_line();
-        serialPort.println(line);
-        command_parser.parse(line);
+
+// wifi functions
+bool System::disconnect_wifi() {
+    if (!wifi_connected) {
+        serialPort.println("Not currently connected to WiFi.");
+        return false;
     }
+
+    wifi.disconnect();                        // tell the driver to drop the AP
+    wifi_connected = false;
+    serialPort.println("Disconnected from WiFi.");
+    return true;
 }
 
-// ——— Wi-Fi flows (unchanged) ———
+bool System::reset_wifi_credentials() {
+    // Clear stored credentials
+    memory.write_bit("wifi_flags", 0, 0);
+    memory.write_str("wifi_name", "");
+    memory.write_str("wifi_pass", "");
+
+    // If we're currently connected, drop out
+    if (wifi_connected) {
+        wifi.disconnect();
+        wifi_connected = false;
+    }
+
+    serialPort.println("WiFi credentials have been reset. You will be prompted to re-enter them on next connect.");
+    return true;
+}
 
 bool System::connect_wifi() {
     String ssid, pwd;

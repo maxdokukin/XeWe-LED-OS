@@ -15,23 +15,25 @@ public:
     void update();
 
 private:
-    // Wi-Fi flows
+    void define_commands();
+
+//    wifi
     bool connect_wifi();
     bool read_memory_wifi_credentials(String& ssid, String& pwd);
     bool prompt_user_for_wifi_credentials(String& ssid, String& pwd);
+    bool disconnect_wifi();
+    bool reset_wifi_credentials();
 
     SerialPort                        serialPort;
-    Wifi                        wifi;
+    Wifi                              wifi;
     Memory                            memory;
     bool                              wifi_connected = false;
-
     CommandParser                     command_parser;
 
-    // Fixed-size array for wifi commands
-    static const size_t WIFI_CMD_COUNT = 3;
+    // Increase to 5 so we can index 0…4
+    static const size_t WIFI_CMD_COUNT = 5;
     CommandParser::Command      wifiCommands[WIFI_CMD_COUNT];
     CommandParser::CommandGroup wifiGroup;
 };
 
 #endif // SYSTEM_H
-
