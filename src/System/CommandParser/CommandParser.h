@@ -26,14 +26,11 @@ public:
     // Set the available command groups
     void set_groups(const CommandGroup* groups, size_t group_count);
 
-    // Parse one incoming line
-    void parse(const String& input_line) const;
-
+    void parse_and_execute(const String& input) const;
 private:
     const CommandGroup* groups_       = nullptr;
     size_t               group_count_ = 0;
 
-    void parse_and_execute(const String& input) const;
 };
 
 #endif // COMMAND_PARSER_H

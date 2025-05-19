@@ -7,10 +7,6 @@ void CommandParser::set_groups(const CommandGroup* groups, size_t group_count) {
     group_count_ = group_count;
 }
 
-void CommandParser::parse(const String& input_line) const {
-    parse_and_execute(input_line);
-}
-
 void CommandParser::parse_and_execute(const String& input) const {
     String line = input;
     line.trim();

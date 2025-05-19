@@ -19,6 +19,7 @@ private:
     void define_commands();
 
     // Wi-Fi flows
+    void print_wifi_credentials();
     bool connect_wifi();
     bool read_memory_wifi_credentials(String& ssid, String& pwd);
     bool prompt_user_for_wifi_credentials(String& ssid, String& pwd);

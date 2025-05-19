@@ -7,7 +7,6 @@ System::System()
     , wifi("ESP32-C3-Device")
     , memory(512)
     , wifi_connected(false)
-    , command_parser()
 {}
 
 // ——— init_system_setup ———
@@ -16,9 +15,7 @@ void System::init_system_setup() {
     serial_port.println("This is a complete OS solution to control the addressable LED lights.");
     serial_port.println("Communication supported: serial port");
     serial_port.println("Communication to be supported: Webserver, Alexa, Homekit, Yandex-Alisa");
-
     define_commands();
-
     serial_port.println("Let's connect to WiFi:");
     connect_wifi();
 }
@@ -28,7 +25,7 @@ void System::update() {
     if (serial_port.has_line()) {
         String line = serial_port.read_line();
         serial_port.println(line);
-        command_parser.parse(line);
+        command_parser.parse_and_execute(line);
     }
 }
 
@@ -47,7 +44,7 @@ void System::define_commands() {
     };
 
     // reset credentials
-    wifi_commands[2].name     = "reset credentials";
+    wifi_commands[2].name     = "reset_credentials";
     wifi_commands[2].function = [this](const String&) {
         reset_wifi_credentials();
     };
@@ -56,8 +53,7 @@ void System::define_commands() {
     wifi_commands[3].name     = "status";
     wifi_commands[3].function = [this](const String&) {
         if (wifi_connected) {
-            serial_port.print("Connected. IP: ");
-            serial_port.println(wifi.get_local_ip());
+            print_wifi_credentials();
         } else {
             serial_port.println("WiFi not connected");
         }
@@ -66,9 +62,9 @@ void System::define_commands() {
     // scan
     wifi_commands[4].name     = "scan";
     wifi_commands[4].function = [this](const String&) {
+        serial_port.println("Scanning available networks...");
         auto networks = wifi.get_available_networks();
         serial_port.println("Available networks:");
-        serial_port.println("0: Enter custom SSID");
         for (size_t i = 0; i < networks.size(); ++i) {
             serial_port.print(String(i + 1) + ": ");
             serial_port.println(networks[i]);
@@ -85,6 +81,12 @@ void System::define_commands() {
 // ——— connect_wifi ———
 bool System::connect_wifi() {
     String ssid, pwd;
+    if (wifi_connected){
+        serial_port.println("Already connected.");
+        print_wifi_credentials();
+        serial_port.println("Use '$wifi reset_credentials' to change the network.");
+        return true;
+    }
 
     if (!read_memory_wifi_credentials(ssid, pwd)) {
         prompt_user_for_wifi_credentials(ssid, pwd);
@@ -95,10 +97,7 @@ bool System::connect_wifi() {
         serial_port.println(ssid);
 
         if (wifi.connect(ssid, pwd)) {
-            serial_port.print("Connected to ");
-            serial_port.println(ssid);
-            serial_port.print("Local ip: ");
-            serial_port.println(wifi.get_local_ip());
+            print_wifi_credentials();
 
             memory.write_bit("wifi_flags", 0, 1);
             memory.write_str("wifi_name", ssid);
@@ -115,6 +114,15 @@ bool System::connect_wifi() {
     }
 
     return false;
+}
+
+void System::print_wifi_credentials(){
+    if (wifi_connected) {
+        serial_port.print("Connected to ");
+        serial_port.println(memory.read_str("wifi_name"));
+        serial_port.print("Local ip: ");
+        serial_port.println(wifi.get_local_ip());
+    }
 }
 
 // ——— read_memory_wifi_credentials ———
@@ -147,8 +155,7 @@ bool System::read_memory_wifi_credentials(String& ssid, String& pwd) {
 // ——— prompt_user_for_wifi_credentials ———
 bool System::prompt_user_for_wifi_credentials(String& ssid, String& pwd) {
     memory.write_bit("wifi_flags", 0, 0);
-    serial_port.println("Please enter new WiFi credentials:");
-
+    serial_port.println("Scanning available networks");
     auto networks = wifi.get_available_networks();
     serial_port.println("Available networks:");
     serial_port.println("0: Enter custom SSID");
@@ -178,16 +185,10 @@ bool System::prompt_user_for_wifi_credentials(String& ssid, String& pwd) {
         return false;
     }
 
-    {
-        bool ok = false;
-        while (!ok) {
-            serial_port.println("Enter password:");
-            pwd = serial_port.get_string();
-            serial_port.print("Confirm password: ");
-            serial_port.println(pwd);
-            ok = serial_port.get_confirmation();
-        }
-    }
+    serial_port.print("Enter password for ");
+    serial_port.println(ssid);
+    pwd = serial_port.get_string();
+    serial_port.println(pwd);
 
     return true;
 }
@@ -218,7 +219,7 @@ bool System::reset_wifi_credentials() {
 
     serial_port.println(
         "WiFi credentials have been reset. "
-        "You will be prompted to re-enter them on next connect."
+        "Use '$wifi connect' to select new network"
     );
     return true;
 }
