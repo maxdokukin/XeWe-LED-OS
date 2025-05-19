@@ -1,5 +1,8 @@
- void setup() {
-  // put your setup code here, to run once:
+#include "src/System/System.h"
+
+
+void setup() {
+  System.init_system_setup();
 
 }
 
