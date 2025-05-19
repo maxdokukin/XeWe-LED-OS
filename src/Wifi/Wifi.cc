@@ -67,3 +67,8 @@ bool Wifi::is_connected() const {
 String Wifi::get_local_ip() const {
     return WiFi.localIP().toString();
 }
+
+String Wifi::get_ssid() const {
+    return WiFi.SSID();
+}
+

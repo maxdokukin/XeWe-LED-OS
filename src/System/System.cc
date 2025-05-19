@@ -43,7 +43,6 @@ void System::define_commands() {
 
     wifi_commands[3].name     = "status";
     wifi_commands[3].function = [this](const String&) { print_wifi_credentials(); };
-    };
 
     wifi_commands[4].name     = "scan";
     wifi_commands[4].function = [this](const String&) {
@@ -58,7 +57,7 @@ void System::define_commands() {
 
     wifi_group.name          = "wifi";
     wifi_group.commands      = wifi_commands;
-    wifi_group.commandCount  = WIFI_CMD_COUNT;
+    wifi_group.command_count  = WIFI_CMD_COUNT;
     command_parser.set_groups(&wifi_group, 1);
 }
 
@@ -86,8 +85,6 @@ bool System::connect_wifi() {
         serial_port.print("Connecting to '");
         serial_port.print(ssid);
         serial_port.println("'...");
-        serial_port.print("Password length: ");
-        serial_port.println(String(pwd.length()));
 
         if (wifi.connect(ssid, pwd)) {
             print_wifi_credentials();
@@ -119,7 +116,7 @@ void System::print_wifi_credentials() {
     }
 
     serial_port.print("Connected to ");
-    serial_port.println(memory.read_str("wifi_name"));
+    serial_port.println(wifi.get_ssid());
     serial_port.print("Local ip: ");
     serial_port.println(wifi.get_local_ip());
 }

@@ -24,6 +24,9 @@ public:
 
     // Returns the local IP address as a String ("a.b.c.d")
     String get_local_ip() const;
+
+    // Returns the SSID of the currently connected network (empty if none)
+    String get_ssid() const;
 };
 
 #endif // WIFI_H
