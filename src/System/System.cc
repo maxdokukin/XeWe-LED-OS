@@ -10,14 +10,15 @@ System::System()
 
 // ——— init_system_setup ———
 void System::init_system_setup() {
+    serial_port.print_dash_line();
     serial_port.println("Welcome to the XeWe Led OS!");
     serial_port.println("This is a complete OS solution to control the addressable LED lights.");
     serial_port.println("Communication supported: serial port");
     serial_port.println("Communication to be supported: Webserver, Alexa, Homekit, Yandex-Alisa");
+    serial_port.print_dash_line();
 
     define_commands();
 
-    serial_port.println("Let's connect to WiFi:");
     connect_wifi();
 }
 
@@ -58,24 +59,25 @@ void System::define_commands() {
 
 // ——— connect_wifi ———
 bool System::connect_wifi() {
-    String ssid, pwd;
+    serial_port.print_dash_line();
 
+    String ssid, pwd;
     if (wifi.is_connected()) {
         serial_port.println("Already connected.");
         print_wifi_credentials();
         serial_port.println("Use 'wifi reset_credentials' to change network.");
+        serial_port.print_dash_line();
         return true;
     }
 
-    // either load or prompt
     if (!read_memory_wifi_credentials(ssid, pwd)) {
         if (!prompt_user_for_wifi_credentials(ssid, pwd)) {
             serial_port.println("WiFi setup aborted by user.");
+            serial_port.print_dash_line();
             return false;
         }
     }
 
-    // attempt loop
     while (!wifi.is_connected()) {
         serial_port.print("Connecting to '");
         serial_port.print(ssid);
@@ -86,6 +88,7 @@ bool System::connect_wifi() {
             memory.write_bit("wifi_flags", 0, 1);
             memory.write_str("wifi_name", ssid);
             memory.write_str("wifi_pass", pwd);
+            serial_port.print_dash_line();
             return true;
         }
 
@@ -96,17 +99,22 @@ bool System::connect_wifi() {
 
         if (!prompt_user_for_wifi_credentials(ssid, pwd)) {
             serial_port.println("WiFi setup aborted by user.");
+            serial_port.print_dash_line();
             return false;
         }
     }
 
+    serial_port.print_dash_line();
     return false;
 }
 
 // ——— print_wifi_credentials ———
 void System::print_wifi_credentials() {
-    if(!wifi.is_connected()){
+    serial_port.print_dash_line();
+
+    if (!wifi.is_connected()) {
         serial_port.println("WiFi not connected");
+        serial_port.print_dash_line();
         return;
     }
 
@@ -116,6 +124,8 @@ void System::print_wifi_credentials() {
     serial_port.println(wifi.get_local_ip());
     serial_port.print("MAC: ");
     serial_port.println(wifi.get_mac_address());
+
+    serial_port.print_dash_line();
 }
 
 // ——— read_memory_wifi_credentials ———
@@ -124,6 +134,7 @@ bool System::read_memory_wifi_credentials(String& ssid, String& pwd) {
         return false;
     }
 
+    serial_port.print_dash_line();
     serial_port.println("Found saved WiFi credentials");
     ssid = memory.read_str("wifi_name");
     pwd  = memory.read_str("wifi_pass");
@@ -134,15 +145,18 @@ bool System::read_memory_wifi_credentials(String& ssid, String& pwd) {
 
     if (wifi.connect(ssid, pwd)) {
         print_wifi_credentials();
+        serial_port.print_dash_line();
         return true;
     }
 
     serial_port.println("Stored credentials failed; discarding.");
+    serial_port.print_dash_line();
     return false;
 }
 
 // ——— prompt_user_for_wifi_credentials ———
 bool System::prompt_user_for_wifi_credentials(String& ssid, String& pwd) {
+    serial_port.print_dash_line();
     memory.write_bit("wifi_flags", 0, 0);
 
     std::vector<String> networks = get_available_wifi_networks();
@@ -164,6 +178,7 @@ bool System::prompt_user_for_wifi_credentials(String& ssid, String& pwd) {
     }
     else {
         serial_port.println("Invalid choice. Aborting entry.");
+        serial_port.print_dash_line();
         return false;
     }
 
@@ -172,23 +187,30 @@ bool System::prompt_user_for_wifi_credentials(String& ssid, String& pwd) {
     serial_port.println("':");
     pwd = serial_port.get_string();
 
+    serial_port.print_dash_line();
     return true;
 }
 
 // ——— disconnect_wifi ———
 bool System::disconnect_wifi() {
+    serial_port.print_dash_line();
+
     if (!wifi.is_connected()) {
         serial_port.println("Not currently connected to WiFi.");
+        serial_port.print_dash_line();
         return false;
     }
 
     wifi.disconnect();
     serial_port.println("Disconnected from WiFi.");
+    serial_port.print_dash_line();
     return true;
 }
 
 // ——— reset_wifi_credentials ———
 bool System::reset_wifi_credentials() {
+    serial_port.print_dash_line();
+
     memory.write_bit("wifi_flags", 0, 0);
     memory.write_str("wifi_name", "");
     memory.write_str("wifi_pass", "");
@@ -201,23 +223,31 @@ bool System::reset_wifi_credentials() {
         "WiFi credentials have been reset. "
         "Use 'wifi connect' to select a new network."
     );
+    serial_port.print_dash_line();
     return true;
 }
 
-std::vector<String> System::get_available_wifi_networks(){
+// ——— get_available_wifi_networks ———
+std::vector<String> System::get_available_wifi_networks() {
+    serial_port.print_dash_line();
+
     serial_port.println("Scanning available networks...");
     std::vector<String> networks = wifi.get_available_networks();
+
     serial_port.println("Available networks:");
     serial_port.println("0: Enter custom SSID");
     for (size_t i = 0; i < networks.size(); ++i) {
         serial_port.print(String(i + 1) + ": ");
         serial_port.println(networks[i]);
     }
+
+    serial_port.print_dash_line();
     return networks;
 }
 
 // ——— print_wifi_help ———
 void System::print_wifi_help() {
+    serial_port.print_dash_line();
     serial_port.println("WiFi commands:");
     serial_port.println("  $help              - Show this help message");
     serial_port.println("  $connect           - Connect or reconnect to WiFi");
@@ -225,4 +255,5 @@ void System::print_wifi_help() {
     serial_port.println("  $reset_credentials - Clear saved WiFi credentials");
     serial_port.println("  $status            - Show connection status & IP");
     serial_port.println("  $scan              - List available WiFi networks");
+    serial_port.print_dash_line();
 }
