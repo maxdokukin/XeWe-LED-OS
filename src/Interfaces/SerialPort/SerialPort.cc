@@ -4,10 +4,7 @@ SerialPort::SerialPort(unsigned long baud)
   : _baud(baud)
 {
     Serial.begin(_baud);
-    // On ESP32-C3, waiting for the USB-CDC Serial port to be ready
-    while (!Serial) {
-        delay(10);
-    }
+    delay(2);
 }
 
 void SerialPort::println(const String &msg) {
