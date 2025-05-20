@@ -160,6 +160,7 @@ void LedController::turn_off() {
         Serial.println("Already off");
         return;
     }
+    state = 0;
     brightness->set_brightness(0);
 }
 
