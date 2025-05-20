@@ -7,11 +7,13 @@
 
 class CommandParser {
 public:
-    // Any callable type taking the argument string
+    // Any callable taking the argument string
     using command_function_t = std::function<void(const String& args)>;
 
     struct Command {
         const char*            name;
+        const char*            description;
+        size_t                 arg_count;
         command_function_t     function;
     };
 
@@ -26,11 +28,12 @@ public:
     // Set the available command groups
     void set_groups(const CommandGroup* groups, size_t group_count);
 
+    // Parse and execute a raw input line
     void parse_and_execute(const String& input) const;
+
 private:
     const CommandGroup* groups_       = nullptr;
     size_t               group_count_ = 0;
-
 };
 
 #endif // COMMAND_PARSER_H

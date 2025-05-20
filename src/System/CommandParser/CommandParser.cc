@@ -62,6 +62,13 @@ void CommandParser::parse_and_execute(const String& input) const {
             for (size_t j = 0; j < grp.command_count; ++j) {
                 const Command& cmd = grp.commands[j];
                 if (command_name.equalsIgnoreCase(cmd.name)) {
+                    // (Optionally) check arg count:
+                    if (cmd.arg_count != 0 && arguments.length() == 0) {
+                        Serial.print("Error: '");
+                        Serial.print(cmd.name);
+                        Serial.println("' requires arguments.");
+                        return;
+                    }
                     cmd.function(arguments);
                     return;
                 }
@@ -74,4 +81,3 @@ void CommandParser::parse_and_execute(const String& input) const {
 
     Serial.println("Unknown command group.");
 }
-

@@ -38,29 +38,61 @@ void System::update() {
 
 // ——— define_commands ———
 void System::define_commands() {
-    wifi_commands[0].name     = "help";
-    wifi_commands[0].function = [this](const String&) { print_wifi_help(); };
+    // help
+    wifi_commands[0].name        = "help";
+    wifi_commands[0].description = "Show this help message";
+    wifi_commands[0].arg_count   = 0;
+    wifi_commands[0].function    = [this](const String&) {
+        print_wifi_help();
+    };
 
-    wifi_commands[1].name     = "connect";
-    wifi_commands[1].function = [this](const String&) { connect_wifi(); };
+    // connect
+    wifi_commands[1].name        = "connect";
+    wifi_commands[1].description = "Connect or reconnect to WiFi";
+    wifi_commands[1].arg_count   = 0;
+    wifi_commands[1].function    = [this](const String&) {
+        connect_wifi();
+    };
 
-    wifi_commands[2].name     = "disconnect";
-    wifi_commands[2].function = [this](const String&) { disconnect_wifi(); };
+    // disconnect
+    wifi_commands[2].name        = "disconnect";
+    wifi_commands[2].description = "Disconnect from WiFi";
+    wifi_commands[2].arg_count   = 0;
+    wifi_commands[2].function    = [this](const String&) {
+        disconnect_wifi();
+    };
 
-    wifi_commands[3].name     = "reset_credentials";
-    wifi_commands[3].function = [this](const String&) { reset_wifi_credentials(); };
+    // reset_credentials
+    wifi_commands[3].name        = "reset_credentials";
+    wifi_commands[3].description = "Clear saved WiFi credentials";
+    wifi_commands[3].arg_count   = 0;
+    wifi_commands[3].function    = [this](const String&) {
+        reset_wifi_credentials();
+    };
 
-    wifi_commands[4].name     = "status";
-    wifi_commands[4].function = [this](const String&) { print_wifi_credentials(); };
+    // status
+    wifi_commands[4].name        = "status";
+    wifi_commands[4].description = "Show connection status, SSID, IP, MAC";
+    wifi_commands[4].arg_count   = 0;
+    wifi_commands[4].function    = [this](const String&) {
+        print_wifi_credentials();
+    };
 
-    wifi_commands[5].name     = "scan";
-    wifi_commands[5].function = [this](const String&) { get_available_wifi_networks(); };
+    // scan
+    wifi_commands[5].name        = "scan";
+    wifi_commands[5].description = "List available WiFi networks";
+    wifi_commands[5].arg_count   = 0;
+    wifi_commands[5].function    = [this](const String&) {
+        get_available_wifi_networks();
+    };
 
+    // register group
     wifi_group.name          = "wifi";
     wifi_group.commands      = wifi_commands;
-    wifi_group.command_count  = WIFI_CMD_COUNT;
+    wifi_group.command_count = WIFI_CMD_COUNT;
     command_parser.set_groups(&wifi_group, 1);
 }
+
 
 // ——— connect_wifi ———
 bool System::connect_wifi() {
@@ -254,11 +286,15 @@ std::vector<String> System::get_available_wifi_networks() {
 void System::print_wifi_help() {
     serial_port.print_spacer();
     serial_port.println("WiFi commands:");
-    serial_port.println("  $help              - Show this help message");
-    serial_port.println("  $connect           - Connect or reconnect to WiFi");
-    serial_port.println("  $disconnect        - Disconnect from WiFi");
-    serial_port.println("  $reset_credentials - Clear saved WiFi credentials");
-    serial_port.println("  $status            - Show connection status & IP");
-    serial_port.println("  $scan              - List available WiFi networks");
+    for (size_t i = 0; i < WIFI_CMD_COUNT; ++i) {
+        const auto &cmd = wifi_commands[i];
+        serial_port.print("  $");
+        serial_port.print(cmd.name);
+        serial_port.print(" - ");
+        serial_port.print(cmd.description);
+        serial_port.print(", argument count: ");
+        serial_port.println(String(cmd.arg_count));
+    }
     serial_port.print_spacer();
 }
+
