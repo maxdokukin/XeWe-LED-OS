@@ -7,28 +7,27 @@
 
 class CommandParser {
 public:
-    // Any callable taking the argument string
     using command_function_t = std::function<void(const String& args)>;
 
     struct Command {
-        const char*            name;
-        const char*            description;
-        size_t                 arg_count;
-        command_function_t     function;
+        const char*          name;
+        const char*          description;
+        size_t               arg_count;
+        command_function_t   function;
     };
 
     struct CommandGroup {
-        const char*            name;
-        const Command*         commands;
-        size_t                 command_count;
+        const char*          name;
+        const Command*       commands;
+        size_t               command_count;
     };
 
     CommandParser() = default;
 
-    // Set the available command groups
+    // Provide your groups array and its size
     void set_groups(const CommandGroup* groups, size_t group_count);
 
-    // Parse and execute a raw input line
+    // Parse lines of the form "$<group> <command> [args...]"
     void parse_and_execute(const String& input) const;
 
 private:

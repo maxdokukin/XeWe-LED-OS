@@ -43,20 +43,99 @@ void SystemController::update() {
 
 // ——— define_commands ———
 void SystemController::define_commands() {
+    // populate Wi-Fi commands
+    wifi_commands[0] = { "help",              "Show this help message",                0, [this](auto&){ print_wifi_help(); } };
+    wifi_commands[1] = { "connect",           "Connect or reconnect to WiFi",          0, [this](auto&){ connect_wifi(); } };
+    wifi_commands[2] = { "disconnect",        "Disconnect from WiFi",                  0, [this](auto&){ disconnect_wifi(); } };
+    wifi_commands[3] = { "reset_credentials", "Clear saved WiFi credentials",          0, [this](auto&){ reset_wifi_credentials(); } };
+    wifi_commands[4] = { "status",            "Show connection status, SSID, IP, MAC", 0, [this](auto&){ print_wifi_credentials(); } };
+    wifi_commands[5] = { "scan",              "List available WiFi networks",          0, [this](auto&){ get_available_wifi_networks(); } };
 
-    static const CommandParser::Command wifi_commands[WIFI_CMD_COUNT] = {
-        { "help",              "Show this help message",                0, [this](const String&){ print_wifi_help(); } },
-        { "connect",           "Connect or reconnect to WiFi",          0, [this](const String&){ connect_wifi(); } },
-        { "disconnect",        "Disconnect from WiFi",                  0, [this](const String&){ disconnect_wifi(); } },
-        { "reset_credentials", "Clear saved WiFi credentials",          0, [this](const String&){ reset_wifi_credentials(); } },
-        { "status",            "Show connection status, SSID, IP, MAC", 0, [this](const String&){ print_wifi_credentials(); } },
-        { "scan",              "List available WiFi networks",          0, [this](const String&){ get_available_wifi_networks(); } },
-    };
-    static const CommandParser::CommandGroup wifi_group = { "wifi", wifi_commands, WIFI_CMD_COUNT };
+    // populate LED-strip commands
+    led_strip_commands[0]  = { "set_mode",       "Set LED strip mode",          1, [this](auto& a){ led_strip_set_mode(a); } };
+    led_strip_commands[1]  = { "set_rgb",        "Set RGB color",               3, [this](auto& a){ led_strip_set_rgb(a); } };
+    led_strip_commands[2]  = { "set_r",          "Set red channel",             1, [this](auto& a){ led_strip_set_r(a); } };
+    led_strip_commands[3]  = { "set_g",          "Set green channel",           1, [this](auto& a){ led_strip_set_g(a); } };
+    led_strip_commands[4]  = { "set_b",          "Set blue channel",            1, [this](auto& a){ led_strip_set_b(a); } };
+    led_strip_commands[5]  = { "set_hsv",        "Set HSV color",               3, [this](auto& a){ led_strip_set_hsv(a); } };
+    led_strip_commands[6]  = { "set_hue",        "Set hue channel",             1, [this](auto& a){ led_strip_set_hue(a); } };
+    led_strip_commands[7]  = { "set_sat",        "Set saturation channel",      1, [this](auto& a){ led_strip_set_sat(a); } };
+    led_strip_commands[8]  = { "set_val",        "Set value channel",           1, [this](auto& a){ led_strip_set_val(a); } };
+    led_strip_commands[9]  = { "set_brightness", "Set global brightness",       1, [this](auto& a){ led_strip_set_brightness(a); } };
+    led_strip_commands[10] = { "set_state",      "Set on/off state",            1, [this](auto& a){ led_strip_set_state(a); } };
+    led_strip_commands[11] = { "turn_on",        "Turn strip on",               0, [this](auto& a){ led_strip_turn_on(a); } };
+    led_strip_commands[12] = { "turn_off",       "Turn strip off",              0, [this](auto& a){ led_strip_turn_off(a); } };
 
-    // register with the parser
-    command_parser.set_groups(&wifi_group, 1);
+    // populate groups
+    command_groups[0] = { "wifi", wifi_commands,      WIFI_CMD_COUNT };
+    command_groups[1] = { "led",  led_strip_commands, LED_STRIP_CMD_COUNT };
+
+    // register
+    command_parser.set_groups(command_groups, CMD_GROUP_COUNT);
 }
+
+// ——— LED handlers ———
+void SystemController::led_strip_set_mode(const String& args) {
+    uint8_t mode = static_cast<uint8_t>(args.toInt());
+    led_controller.set_mode(mode);
+}
+
+void SystemController::led_strip_set_rgb(const String& args) {
+    int i1 = args.indexOf(' '), i2 = args.indexOf(' ', i1 + 1);
+    uint8_t r = args.substring(0, i1).toInt();
+    uint8_t g = args.substring(i1 + 1, i2).toInt();
+    uint8_t b = args.substring(i2 + 1).toInt();
+    led_controller.set_rgb(r, g, b);
+}
+
+void SystemController::led_strip_set_r(const String& args) {
+    led_controller.set_r(static_cast<uint8_t>(args.toInt()));
+}
+
+void SystemController::led_strip_set_g(const String& args) {
+    led_controller.set_g(static_cast<uint8_t>(args.toInt()));
+}
+
+void SystemController::led_strip_set_b(const String& args) {
+    led_controller.set_b(static_cast<uint8_t>(args.toInt()));
+}
+
+void SystemController::led_strip_set_hsv(const String& args) {
+    int i1 = args.indexOf(' '), i2 = args.indexOf(' ', i1 + 1);
+    uint8_t h = args.substring(0, i1).toInt();
+    uint8_t s = args.substring(i1 + 1, i2).toInt();
+    uint8_t v = args.substring(i2 + 1).toInt();
+    led_controller.set_hsv(h, s, v);
+}
+
+void SystemController::led_strip_set_hue(const String& args) {
+    led_controller.set_hue(static_cast<uint8_t>(args.toInt()));
+}
+
+void SystemController::led_strip_set_sat(const String& args) {
+    led_controller.set_sat(static_cast<uint8_t>(args.toInt()));
+}
+
+void SystemController::led_strip_set_val(const String& args) {
+    led_controller.set_val(static_cast<uint8_t>(args.toInt()));
+}
+
+void SystemController::led_strip_set_brightness(const String& args) {
+    led_controller.set_brightness(static_cast<uint8_t>(args.toInt()));
+}
+
+void SystemController::led_strip_set_state(const String& args) {
+    led_controller.set_state(static_cast<byte>(args.toInt()));
+}
+
+void SystemController::led_strip_turn_on(const String&) {
+    led_controller.turn_on();
+}
+
+void SystemController::led_strip_turn_off(const String&) {
+    led_controller.turn_off();
+}
+
 
 
 //////WIFI/////
