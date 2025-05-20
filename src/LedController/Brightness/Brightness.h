@@ -17,6 +17,7 @@ public:
     bool is_changing();
     uint8_t get_current_value() const;
     uint8_t get_target_value() const;
+    uint8_t get_start_value() const;
 
 private:
     LedController* led_controller;

@@ -26,6 +26,10 @@ uint8_t Brightness::get_target_value() const {
     return timer->get_target_value();
 }
 
+uint8_t Brightness::get_start_value() const {
+    return timer->get_start_value();
+}
+
 void Brightness::set_brightness(uint8_t new_brightness) {
     if (timer->is_active()) {
         return;

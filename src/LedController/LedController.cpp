@@ -150,7 +150,7 @@ void LedController::turn_on() {
         Serial.println("Already on");
         return;
     }
-    brightness->set_brightness(brightness->get_target_value());
+    brightness->set_brightness(brightness->get_start_value());
     state = 1;
 }
 
