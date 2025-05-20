@@ -21,8 +21,8 @@ private:
     void define_commands();
 
     // Wi-Fi flows
-    void print_wifi_credentials();
     void print_wifi_help();
+    void print_wifi_credentials();
     std::vector<String> get_available_wifi_networks();
     bool connect_wifi();
     bool read_memory_wifi_credentials(String& ssid, String& pwd);
@@ -31,6 +31,7 @@ private:
     bool reset_wifi_credentials();
 
     // LED
+    void led_strip_print_help();
     void led_strip_set_mode(const String& args);
     void led_strip_set_rgb(const String& args);
     void led_strip_set_r(const String& args);
@@ -42,8 +43,8 @@ private:
     void led_strip_set_val(const String& args);
     void led_strip_set_brightness(const String& args);
     void led_strip_set_state(const String& args);
-    void led_strip_turn_on(const String& args);
-    void led_strip_turn_off(const String& args);
+    void led_strip_turn_on();
+    void led_strip_turn_off();
 
 
     SerialPort                     serial_port;
@@ -54,7 +55,7 @@ private:
 
 //    command storage definitions
     static const size_t            WIFI_CMD_COUNT       = 6;
-    static const size_t            LED_STRIP_CMD_COUNT  = 13;
+    static const size_t            LED_STRIP_CMD_COUNT  = 14;
     static const size_t            CMD_GROUP_COUNT      = 2;
 
     CommandParser::Command         wifi_commands[WIFI_CMD_COUNT];

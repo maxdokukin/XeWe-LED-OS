@@ -52,19 +52,20 @@ void SystemController::define_commands() {
     wifi_commands[5] = { "scan",              "List available WiFi networks",          0, [this](auto&){ get_available_wifi_networks(); } };
 
     // populate LED-strip commands
-    led_strip_commands[0]  = { "set_mode",       "Set LED strip mode",          1, [this](auto& a){ led_strip_set_mode(a); } };
-    led_strip_commands[1]  = { "set_rgb",        "Set RGB color",               3, [this](auto& a){ led_strip_set_rgb(a); } };
-    led_strip_commands[2]  = { "set_r",          "Set red channel",             1, [this](auto& a){ led_strip_set_r(a); } };
-    led_strip_commands[3]  = { "set_g",          "Set green channel",           1, [this](auto& a){ led_strip_set_g(a); } };
-    led_strip_commands[4]  = { "set_b",          "Set blue channel",            1, [this](auto& a){ led_strip_set_b(a); } };
-    led_strip_commands[5]  = { "set_hsv",        "Set HSV color",               3, [this](auto& a){ led_strip_set_hsv(a); } };
-    led_strip_commands[6]  = { "set_hue",        "Set hue channel",             1, [this](auto& a){ led_strip_set_hue(a); } };
-    led_strip_commands[7]  = { "set_sat",        "Set saturation channel",      1, [this](auto& a){ led_strip_set_sat(a); } };
-    led_strip_commands[8]  = { "set_val",        "Set value channel",           1, [this](auto& a){ led_strip_set_val(a); } };
-    led_strip_commands[9]  = { "set_brightness", "Set global brightness",       1, [this](auto& a){ led_strip_set_brightness(a); } };
-    led_strip_commands[10] = { "set_state",      "Set on/off state",            1, [this](auto& a){ led_strip_set_state(a); } };
-    led_strip_commands[11] = { "turn_on",        "Turn strip on",               0, [this](auto& a){ led_strip_turn_on(a); } };
-    led_strip_commands[12] = { "turn_off",       "Turn strip off",              0, [this](auto& a){ led_strip_turn_off(a); } };
+    led_strip_commands[0]  = { "help",           "Show this help message",      0, [this](auto&){ led_strip_print_help(); } };
+    led_strip_commands[1]  = { "set_mode",       "Set LED strip mode",          1, [this](auto& a){ led_strip_set_mode(a); } };
+    led_strip_commands[2]  = { "set_rgb",        "Set RGB color",               3, [this](auto& a){ led_strip_set_rgb(a); } };
+    led_strip_commands[3]  = { "set_r",          "Set red channel",             1, [this](auto& a){ led_strip_set_r(a); } };
+    led_strip_commands[4]  = { "set_g",          "Set green channel",           1, [this](auto& a){ led_strip_set_g(a); } };
+    led_strip_commands[5]  = { "set_b",          "Set blue channel",            1, [this](auto& a){ led_strip_set_b(a); } };
+    led_strip_commands[6]  = { "set_hsv",        "Set HSV color",               3, [this](auto& a){ led_strip_set_hsv(a); } };
+    led_strip_commands[7]  = { "set_hue",        "Set hue channel",             1, [this](auto& a){ led_strip_set_hue(a); } };
+    led_strip_commands[8]  = { "set_sat",        "Set saturation channel",      1, [this](auto& a){ led_strip_set_sat(a); } };
+    led_strip_commands[9]  = { "set_val",        "Set value channel",           1, [this](auto& a){ led_strip_set_val(a); } };
+    led_strip_commands[10]  = { "set_brightness", "Set global brightness",       1, [this](auto& a){ led_strip_set_brightness(a); } };
+    led_strip_commands[11] = { "set_state",      "Set on/off state",            1, [this](auto& a){ led_strip_set_state(a); } };
+    led_strip_commands[12] = { "turn_on",        "Turn strip on",               0, [this](auto&){ led_strip_turn_on(); } };
+    led_strip_commands[13] = { "turn_off",       "Turn strip off",              0, [this](auto&){ led_strip_turn_off(); } };
 
     // populate groups
     command_groups[0] = { "wifi", wifi_commands,      WIFI_CMD_COUNT };
@@ -75,6 +76,20 @@ void SystemController::define_commands() {
 }
 
 // ——— LED handlers ———
+void SystemController::led_strip_print_help() {
+    serial_port.print_spacer();
+    serial_port.println("Led commands:");
+    for (size_t i = 0; i < LED_STRIP_CMD_COUNT; ++i) {
+        const auto &cmd = led_strip_commands[i];
+        serial_port.print("  $");
+        serial_port.print(cmd.name);
+        serial_port.print(" - ");
+        serial_port.print(cmd.description);
+        serial_port.print(", argument count: ");
+        serial_port.println(String(cmd.arg_count));
+    }
+    serial_port.print_spacer();}
+
 void SystemController::led_strip_set_mode(const String& args) {
     uint8_t mode = static_cast<uint8_t>(args.toInt());
     led_controller.set_mode(mode);
@@ -128,11 +143,11 @@ void SystemController::led_strip_set_state(const String& args) {
     led_controller.set_state(static_cast<byte>(args.toInt()));
 }
 
-void SystemController::led_strip_turn_on(const String&) {
+void SystemController::led_strip_turn_on() {
     led_controller.turn_on();
 }
 
-void SystemController::led_strip_turn_off(const String&) {
+void SystemController::led_strip_turn_off() {
     led_controller.turn_off();
 }
 
