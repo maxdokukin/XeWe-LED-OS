@@ -3,15 +3,17 @@
 #define SYSTEMCONTROLLER_H
 
 #include <Arduino.h>
+#include <Adafruit_NeoPixel.h>
 #include <vector>
 #include "../Interfaces/SerialPort/SerialPort.h"
 #include "../Interfaces/Wifi/Wifi.h"
 #include "../Resources/Memory/Memory.h"
+#include "../LedController/LedController.h"
 #include "CommandParser/CommandParser.h"
 
 class SystemController {
 public:
-    SystemController();
+    SystemController(Adafruit_NeoPixel* strip);
     void init_system_setup();
     void update();
 
@@ -33,6 +35,7 @@ private:
     Wifi                           wifi;
     Memory                         memory;
     CommandParser                  command_parser;
+    LedController                  led_controller;
 
     static const size_t            WIFI_CMD_COUNT = 6;
     CommandParser::Command         wifi_commands[WIFI_CMD_COUNT];

@@ -2,11 +2,13 @@
 #include "SystemController.h"
 
 // ——— System ctor ———
-SystemController::SystemController()
+SystemController::SystemController(Adafruit_NeoPixel* strip)
   : serial_port(115200)
   , wifi("ESP32-C3-Device")
   , memory(512)
-{}
+  , led_controller(strip)
+{
+}
 
 // ——— init_system_setup ———
 void SystemController::init_system_setup() {
@@ -25,6 +27,7 @@ void SystemController::init_system_setup() {
     define_commands();
 
     connect_wifi();
+
 }
 
 // ——— update() ———
@@ -34,6 +37,8 @@ void SystemController::update() {
         serial_port.println(line);
         command_parser.parse_and_execute(line);
     }
+
+    led_controller.frame();
 }
 
 // ——— define_commands ———
@@ -54,7 +59,7 @@ void SystemController::define_commands() {
 }
 
 
-//////WIFI////
+//////WIFI/////
 // ——— connect_wifi ———
 bool SystemController::connect_wifi() {
     serial_port.print_spacer();
