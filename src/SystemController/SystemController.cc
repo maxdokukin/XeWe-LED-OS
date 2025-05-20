@@ -38,62 +38,23 @@ void SystemController::update() {
 
 // ——— define_commands ———
 void SystemController::define_commands() {
-    // help
-    wifi_commands[0].name        = "help";
-    wifi_commands[0].description = "Show this help message";
-    wifi_commands[0].arg_count   = 0;
-    wifi_commands[0].function    = [this](const String&) {
-        print_wifi_help();
-    };
 
-    // connect
-    wifi_commands[1].name        = "connect";
-    wifi_commands[1].description = "Connect or reconnect to WiFi";
-    wifi_commands[1].arg_count   = 0;
-    wifi_commands[1].function    = [this](const String&) {
-        connect_wifi();
+    static const CommandParser::Command wifi_commands[WIFI_CMD_COUNT] = {
+        { "help",              "Show this help message",                0, [this](const String&){ print_wifi_help(); } },
+        { "connect",           "Connect or reconnect to WiFi",          0, [this](const String&){ connect_wifi(); } },
+        { "disconnect",        "Disconnect from WiFi",                  0, [this](const String&){ disconnect_wifi(); } },
+        { "reset_credentials", "Clear saved WiFi credentials",          0, [this](const String&){ reset_wifi_credentials(); } },
+        { "status",            "Show connection status, SSID, IP, MAC", 0, [this](const String&){ print_wifi_credentials(); } },
+        { "scan",              "List available WiFi networks",          0, [this](const String&){ get_available_wifi_networks(); } },
     };
+    static const CommandParser::CommandGroup wifi_group = { "wifi", wifi_commands, WIFI_CMD_COUNT };
 
-    // disconnect
-    wifi_commands[2].name        = "disconnect";
-    wifi_commands[2].description = "Disconnect from WiFi";
-    wifi_commands[2].arg_count   = 0;
-    wifi_commands[2].function    = [this](const String&) {
-        disconnect_wifi();
-    };
-
-    // reset_credentials
-    wifi_commands[3].name        = "reset_credentials";
-    wifi_commands[3].description = "Clear saved WiFi credentials";
-    wifi_commands[3].arg_count   = 0;
-    wifi_commands[3].function    = [this](const String&) {
-        reset_wifi_credentials();
-    };
-
-    // status
-    wifi_commands[4].name        = "status";
-    wifi_commands[4].description = "Show connection status, SSID, IP, MAC";
-    wifi_commands[4].arg_count   = 0;
-    wifi_commands[4].function    = [this](const String&) {
-        print_wifi_credentials();
-    };
-
-    // scan
-    wifi_commands[5].name        = "scan";
-    wifi_commands[5].description = "List available WiFi networks";
-    wifi_commands[5].arg_count   = 0;
-    wifi_commands[5].function    = [this](const String&) {
-        get_available_wifi_networks();
-    };
-
-    // register group
-    wifi_group.name          = "wifi";
-    wifi_group.commands      = wifi_commands;
-    wifi_group.command_count = WIFI_CMD_COUNT;
+    // register with the parser
     command_parser.set_groups(&wifi_group, 1);
 }
 
 
+//////WIFI////
 // ——— connect_wifi ———
 bool SystemController::connect_wifi() {
     serial_port.print_spacer();
