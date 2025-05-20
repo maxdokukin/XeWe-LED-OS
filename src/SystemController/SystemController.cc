@@ -1,15 +1,15 @@
-// System.cc
-#include "System.h"
+// SystemController.cc
+#include "SystemController.h"
 
 // ——— System ctor ———
-System::System()
+SystemController::SystemController()
   : serial_port(115200)
   , wifi("ESP32-C3-Device")
   , memory(512)
 {}
 
 // ——— init_system_setup ———
-void System::init_system_setup() {
+void SystemController::init_system_setup() {
     serial_port.println("\n\n\n");
     serial_port.print("+------------------------------------------------+\n"
                       "|          Welcome to the XeWe Led OS            |\n"
@@ -28,7 +28,7 @@ void System::init_system_setup() {
 }
 
 // ——— update() ———
-void System::update() {
+void SystemController::update() {
     if (serial_port.has_line()) {
         String line = serial_port.read_line();
         serial_port.println(line);
@@ -37,7 +37,7 @@ void System::update() {
 }
 
 // ——— define_commands ———
-void System::define_commands() {
+void SystemController::define_commands() {
     // help
     wifi_commands[0].name        = "help";
     wifi_commands[0].description = "Show this help message";
@@ -95,7 +95,7 @@ void System::define_commands() {
 
 
 // ——— connect_wifi ———
-bool System::connect_wifi() {
+bool SystemController::connect_wifi() {
     serial_port.print_spacer();
 
     String ssid, pwd;
@@ -146,7 +146,7 @@ bool System::connect_wifi() {
 }
 
 // ——— print_wifi_credentials ———
-void System::print_wifi_credentials() {
+void SystemController::print_wifi_credentials() {
     serial_port.print_spacer();
 
     if (!wifi.is_connected()) {
@@ -166,7 +166,7 @@ void System::print_wifi_credentials() {
 }
 
 // ——— read_memory_wifi_credentials ———
-bool System::read_memory_wifi_credentials(String& ssid, String& pwd) {
+bool SystemController::read_memory_wifi_credentials(String& ssid, String& pwd) {
     if (!memory.read_bit("wifi_flags", 0)) {
         return false;
     }
@@ -192,7 +192,7 @@ bool System::read_memory_wifi_credentials(String& ssid, String& pwd) {
 }
 
 // ——— prompt_user_for_wifi_credentials ———
-bool System::prompt_user_for_wifi_credentials(String& ssid, String& pwd) {
+bool SystemController::prompt_user_for_wifi_credentials(String& ssid, String& pwd) {
     serial_port.print_spacer();
     memory.write_bit("wifi_flags", 0, 0);
 
@@ -229,7 +229,7 @@ bool System::prompt_user_for_wifi_credentials(String& ssid, String& pwd) {
 }
 
 // ——— disconnect_wifi ———
-bool System::disconnect_wifi() {
+bool SystemController::disconnect_wifi() {
     serial_port.print_spacer();
 
     if (!wifi.is_connected()) {
@@ -245,7 +245,7 @@ bool System::disconnect_wifi() {
 }
 
 // ——— reset_wifi_credentials ———
-bool System::reset_wifi_credentials() {
+bool SystemController::reset_wifi_credentials() {
     serial_port.print_spacer();
 
     memory.write_bit("wifi_flags", 0, 0);
@@ -265,7 +265,7 @@ bool System::reset_wifi_credentials() {
 }
 
 // ——— get_available_wifi_networks ———
-std::vector<String> System::get_available_wifi_networks() {
+std::vector<String> SystemController::get_available_wifi_networks() {
     serial_port.print_spacer();
 
     serial_port.println("Scanning available networks...");
@@ -283,7 +283,7 @@ std::vector<String> System::get_available_wifi_networks() {
 }
 
 // ——— print_wifi_help ———
-void System::print_wifi_help() {
+void SystemController::print_wifi_help() {
     serial_port.print_spacer();
     serial_port.println("WiFi commands:");
     for (size_t i = 0; i < WIFI_CMD_COUNT; ++i) {

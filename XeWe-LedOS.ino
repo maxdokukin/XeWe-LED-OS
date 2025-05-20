@@ -1,10 +1,10 @@
-#include "src/System/System.h"
+#include "src/SystemController/SystemController.h"
 #include <Arduino.h>
 
-System * led_os = nullptr;
+SystemController * led_os = nullptr;
 
 void setup() {
-  led_os = new System();
+  led_os = new SystemController();
   led_os->init_system_setup();
 }
 

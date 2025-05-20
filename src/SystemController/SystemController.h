@@ -1,17 +1,17 @@
-// System.h
-#ifndef SYSTEM_H
-#define SYSTEM_H
+// SystemController.h
+#ifndef SYSTEMCONTROLLER_H
+#define SYSTEMCONTROLLER_H
 
 #include <Arduino.h>
 #include <vector>
 #include "../Interfaces/SerialPort/SerialPort.h"
-#include "../Wifi/Wifi.h"
-#include "../Memory/Memory.h"
+#include "../Interfaces/Wifi/Wifi.h"
+#include "../Resources/Memory/Memory.h"
 #include "CommandParser/CommandParser.h"
 
-class System {
+class SystemController {
 public:
-    System();
+    SystemController();
     void init_system_setup();
     void update();
 
@@ -39,4 +39,4 @@ private:
     CommandParser::CommandGroup    wifi_group;
 };
 
-#endif // SYSTEM_H
+#endif // SYSTEMCONTROLLER_H
