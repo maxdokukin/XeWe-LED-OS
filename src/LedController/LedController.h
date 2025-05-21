@@ -13,7 +13,6 @@ private:
     LedMode* led_mode;
     Brightness* brightness;
 
-    uint8_t state = 0;
     uint16_t num_led = 56;
     uint16_t color_transition_delay = 900;
     uint8_t led_controller_frame_delay = 10;

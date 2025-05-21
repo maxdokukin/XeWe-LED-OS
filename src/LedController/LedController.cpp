@@ -1,23 +1,14 @@
 #include "LedController.h"
 
 LedController::LedController(Adafruit_NeoPixel* strip, uint8_t init_r, uint8_t init_g, uint8_t init_b, uint8_t init_brightness, uint8_t init_state, uint8_t init_mode)
-    : led_strip(strip), state(init_state) {
+    : led_strip(strip) {
 
     led_strip->begin();
     led_strip->setBrightness(255);
 
     frame_timer = new AsyncTimer<uint8_t>(led_controller_frame_delay);
-
     led_mode = new ColorSolid(this, init_r, init_g, init_b);
-    if (state) {
-        brightness = new Brightness(this, init_brightness, brightness_transition_delay);
-    } else {
-        //    emulate routine turn_off()
-        brightness = new Brightness(this, init_brightness, 0);
-        brightness->set_brightness(0);
-        brightness->frame();
-        brightness->set_transition_delay(brightness_transition_delay);
-    }
+    brightness = new Brightness(brightness_transition_delay, init_brightness, init_state);
 
     Serial.println("LedController: Constructor called");
 }
@@ -140,9 +131,7 @@ void LedController::set_brightness(uint8_t new_brightness) {
         Serial.println("LedController: Function: set_brightness: Already set to this value.");
         return;
     }
-    if (state) {
-        brightness->set_brightness(new_brightness);
-    }
+    brightness->set_brightness(new_brightness);
 }
 
 void LedController::set_state(byte target_state){
@@ -154,22 +143,12 @@ void LedController::set_state(byte target_state){
 
 void LedController::turn_on() {
     Serial.println("LedController: Function: turn_on");
-    if(state){
-        Serial.println("Already on");
-        return;
-    }
-    brightness->set_brightness(brightness->get_start_value());
-    state = 1;
+    brightness->turn_on();
 }
 
 void LedController::turn_off() {
     Serial.println("LedController: Function: turn_off");
-    if(!state){
-        Serial.println("Already off");
-        return;
-    }
-    state = 0;
-    brightness->set_brightness(0);
+    brightness->turn_off();
 }
 
 void LedController::fill_all(uint8_t r, uint8_t g, uint8_t b) {
@@ -181,15 +160,10 @@ void LedController::fill_all(uint8_t r, uint8_t g, uint8_t b) {
 }
 
 void LedController::set_all_strips_pixel_color(uint16_t i, uint8_t r, uint8_t g, uint8_t b) {
-    uint8_t current_brightness = brightness->get_current_value();
-    uint8_t min_led_value = static_cast<uint8_t>(current_brightness ? 1 : 0); //0 or 1
-    uint8_t dimmed_r = max(min_led_value, static_cast<uint8_t>((static_cast<uint16_t>(r) * static_cast<uint16_t>(current_brightness)) / 255));
-    uint8_t dimmed_g = max(min_led_value, static_cast<uint8_t>((static_cast<uint16_t>(g) * static_cast<uint16_t>(current_brightness)) / 255));
-    uint8_t dimmed_b = max(min_led_value, static_cast<uint8_t>((static_cast<uint16_t>(b) * static_cast<uint16_t>(current_brightness)) / 255));
 //    if( i == 0){
 //        Serial.printf("LedController: set_all_strips_pixel_color: fill_all, R = %d, G = %d, B = %d, Br=%d\n", dimmed_r, dimmed_g, dimmed_b, current_brightness);
 //    }
-    led_strip->setPixelColor(i, dimmed_r, dimmed_g, dimmed_b);
+    led_strip->setPixelColor(i, brightness->get_dimmed_color(r), brightness->get_dimmed_color(g), brightness->get_dimmed_color(b));
 //    if (is_zigzag_config) {
 //        led_strip->setPixelColor(num_led - i - 1, r, g, b);
 //    }

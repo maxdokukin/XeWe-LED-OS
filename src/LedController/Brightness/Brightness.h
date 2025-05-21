@@ -2,28 +2,44 @@
 #define BRIGHTNESS_H
 
 #include <cstdint>
-
 #include "../AsyncTimer/AsyncTimer.h"
 
 class LedController;
 
 class Brightness {
 public:
-    Brightness(LedController* controller, uint8_t initial_brightness, uint16_t transition_delay);
+    // Match the .cc: controller, transition_delay, initial_brightness, initial state
+    Brightness(uint16_t transition_delay,
+               uint8_t initial_brightness,
+               uint8_t state);
 
+    // Called each loop/frame to advance the timer
     void frame();
-    void set_brightness(uint8_t brightness);
 
+    // Smoothly transition from current to new_brightness
+    void set_brightness(uint8_t new_brightness);
+
+    // Query whether a brightness transition is in progress
     bool is_changing();
+
+    // Timer accessors
     uint8_t get_current_value() const;
     uint8_t get_target_value() const;
     uint8_t get_start_value() const;
+    uint8_t get_dimmed_color(uint8_t color);
 
-    void set_transition_delay(uint32_t new_transition_delay);
+
+    // Turn fully on (from off) or off (saving last)
+    void turn_on();
+    void turn_off();
 
 private:
-    LedController* led_controller;
-    AsyncTimer<uint8_t>* timer;
+    LedController*               led_controller;
+    AsyncTimer<uint8_t>*         timer;
+    uint8_t                      state;
+    uint8_t                      last_brightness;
 };
+
+// Free‐function (as defined in your .cc)
 
 #endif // BRIGHTNESS_H
