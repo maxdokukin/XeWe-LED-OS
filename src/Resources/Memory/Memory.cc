@@ -1,12 +1,12 @@
 // memory.cc
 #include "memory.h"
 
-static constexpr uint8_t MAX_VALUE_SIZE = 32;
+static constexpr uint8_t WIFI_WORD_LEN_MAX = 32;
 
 // EEPROM address map (bytes)
 static constexpr int ADDR_WIFI_FLAGS = 0;
 static constexpr int ADDR_WIFI_NAME  = ADDR_WIFI_FLAGS + 1;
-static constexpr int ADDR_WIFI_PASS  = ADDR_WIFI_NAME  + 1 + MAX_VALUE_SIZE;
+static constexpr int ADDR_WIFI_PASS  = WIFI_WORD_LEN_MAX  + 1 + WIFI_WORD_LEN_MAX;
 
 static int get_address(const String& key) {
     if (key == "wifi_flags") {
@@ -28,7 +28,7 @@ void Memory::write_str(const String& key, const String& value) {
     if (addr < 0) {
         return;
     }
-    uint8_t length = min(static_cast<int>(value.length()), static_cast<int>(MAX_VALUE_SIZE));
+    uint8_t length = min(static_cast<int>(value.length()), static_cast<int>(WIFI_WORD_LEN_MAX));
     EEPROM.write(addr, length);
     for (uint8_t i = 0; i < length; ++i) {
         EEPROM.write(addr + 1 + i, value[i]);

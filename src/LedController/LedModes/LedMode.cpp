@@ -13,6 +13,7 @@ void LedMode::set_rgb(uint8_t r, uint8_t g, uint8_t b) {
     set_r(r);
     set_g(g);
     set_b(b);
+    rgb_to_hsv();
 }
 
 void LedMode::set_r(uint8_t r) { rgb[0] = r; }
@@ -25,6 +26,7 @@ void LedMode::set_hsv(uint8_t hue, uint8_t saturation, uint8_t value) {
     set_hue(hue);
     set_sat(saturation);
     set_val(value);
+    hsv_to_rgb();
 }
 
 void LedMode::set_hue(uint8_t hue) { h = hue; }

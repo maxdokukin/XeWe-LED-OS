@@ -1,0 +1,1 @@
+- add wifi max len for ssid and pass to match up with the memory
