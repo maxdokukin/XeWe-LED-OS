@@ -165,7 +165,7 @@ void LedController::turn_off() {
 }
 
 void LedController::fill_all(uint8_t r, uint8_t g, uint8_t b) {
-    Serial.printf("LedController: Function: fill_all, R = %d, G = %d, B = %d\n", r, g, b);
+//    Serial.printf("LedController: Function: fill_all, R = %d, G = %d, B = %d\n", r, g, b);
     for (int i = 0; i < num_led; i++) {
         set_all_strips_pixel_color(i, r, g, b);
     }
@@ -178,14 +178,9 @@ void LedController::set_all_strips_pixel_color(uint16_t i, uint8_t r, uint8_t g,
     uint8_t dimmed_r = max(min_led_value, static_cast<uint8_t>((static_cast<uint16_t>(r) * static_cast<uint16_t>(current_brightness)) / 255));
     uint8_t dimmed_g = max(min_led_value, static_cast<uint8_t>((static_cast<uint16_t>(g) * static_cast<uint16_t>(current_brightness)) / 255));
     uint8_t dimmed_b = max(min_led_value, static_cast<uint8_t>((static_cast<uint16_t>(b) * static_cast<uint16_t>(current_brightness)) / 255));
-    if( i == 0){
-        Serial.printf("LedController: set_all_strips_pixel_color: fill_all, R = %d, G = %d, B = %d, Br=%d\n", dimmed_r, dimmed_g, dimmed_b, current_brightness);
-        Serial.printf("LedController: set_all_strips_pixel_color: fill_all, r = %d, g = %d, b = %d\n", r, g, b);
-        Serial.printf("LedController: set_all_strips_pixel_color: fill_all, static_cast<uint16_t>(r) = %d, static_cast<uint16_t>(g) = %d, static_cast<uint16_t>(b) = %d\n", static_cast<uint16_t>(r), static_cast<uint16_t>(g), static_cast<uint16_t>(b));
-        Serial.printf("LedController: set_all_strips_pixel_color: fill_all, static_cast<uint16_t>(r) * static_cast<uint16_t>(current_brightness) = %d, static_cast<uint16_t>(g) * static_cast<uint16_t>(current_brightness) = %d, static_cast<uint16_t>(b) * static_cast<uint16_t>(current_brightness) = %d\n", static_cast<uint16_t>(r) * static_cast<uint16_t>(current_brightness), static_cast<uint16_t>(g) * static_cast<uint16_t>(current_brightness), static_cast<uint16_t>(b) * static_cast<uint16_t>(current_brightness));
-        Serial.printf("LedController: set_all_strips_pixel_color: fill_all, static_cast<uint16_t>(r) * static_cast<uint16_t>(current_brightness)) / 255 = %d, static_cast<uint16_t>(g) * static_cast<uint16_t>(current_brightness)) / 255 = %d, static_cast<uint16_t>(b) * static_cast<uint16_t>(current_brightness)) / 255 = %d\n", (static_cast<uint16_t>(r) * static_cast<uint16_t>(current_brightness)) / 255, (static_cast<uint16_t>(g) * static_cast<uint16_t>(current_brightness)) / 255, (static_cast<uint16_t>(b) * static_cast<uint16_t>(current_brightness)));
-        Serial.printf("LedController: set_all_strips_pixel_color: fill_all, static_cast<uint8_t>static_cast<uint16_t>(r) * static_cast<uint16_t>(current_brightness)) / 255 = %d, static_cast<uint8_t>(static_cast<uint16_t>(g) * static_cast<uint16_t>(current_brightness)) / 255 = %d, static_cast<uint8_t>(static_cast<uint16_t>(b) * static_cast<uint16_t>(current_brightness)) / 255 = %d\n", static_cast<uint8_t>((static_cast<uint16_t>(r) * static_cast<uint16_t>(current_brightness)) / 255), static_cast<uint8_t>((static_cast<uint16_t>(g) * static_cast<uint16_t>(current_brightness)) / 255), static_cast<uint8_t>((static_cast<uint16_t>(b) * static_cast<uint16_t>(current_brightness))));
-    }
+//    if( i == 0){
+//        Serial.printf("LedController: set_all_strips_pixel_color: fill_all, R = %d, G = %d, B = %d, Br=%d\n", dimmed_r, dimmed_g, dimmed_b, current_brightness);
+//    }
     led_strip->setPixelColor(i, dimmed_r, dimmed_g, dimmed_b);
 //    if (is_zigzag_config) {
 //        led_strip->setPixelColor(num_led - i - 1, r, g, b);
