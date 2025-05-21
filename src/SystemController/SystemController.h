@@ -21,10 +21,10 @@ private:
     void define_commands();
 
     // Wi-Fi flows
-    void print_wifi_help();
-    void print_wifi_credentials();
-    std::vector<String> get_available_wifi_networks();
-    bool connect_wifi();
+    void wifi_print_help();
+    void wifi_print_credentials();
+    std::vector<String> wifi_get_available_networks();
+    bool wifi_connect();
     bool read_memory_wifi_credentials(String& ssid, String& pwd);
     bool prompt_user_for_wifi_credentials(String& ssid, String& pwd);
     bool disconnect_wifi();

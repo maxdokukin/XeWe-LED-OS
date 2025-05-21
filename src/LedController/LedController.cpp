@@ -1,19 +1,23 @@
 #include "LedController.h"
 
-LedController::LedController(Adafruit_NeoPixel* strip)
-    : led_strip(strip) {
+LedController::LedController(Adafruit_NeoPixel* strip, uint8_t init_r, uint8_t init_g, uint8_t init_b, uint8_t init_brightness, uint8_t init_state, uint8_t init_mode)
+    : led_strip(strip), state(init_state) {
 
     led_strip->begin();
     led_strip->setBrightness(255);
 
-    //    Functional classes
     frame_timer = new AsyncTimer<uint8_t>(led_controller_frame_delay);
-    // read from memory mode
-    led_mode = new ColorSolid(this, init_r, init_g, init_b);
-    led_mode->set_rgb(init_r, init_g, init_b);
-    led_mode->rgb_to_hsv();
 
-    brightness = new Brightness(this, init_brightness, brightness_transition_delay);
+    led_mode = new ColorSolid(this, init_r, init_g, init_b);
+    if (state) {
+        brightness = new Brightness(this, init_brightness, brightness_transition_delay);
+    } else {
+        //    emulate routine turn_off()
+        brightness = new Brightness(this, init_brightness, 0);
+        brightness->set_brightness(0);
+        brightness->frame();
+        brightness->set_transition_delay(brightness_transition_delay);
+    }
 
     Serial.println("LedController: Constructor called");
 }
@@ -96,6 +100,10 @@ void LedController::set_b(uint8_t b) {
     Serial.printf("LedController: Function: set_b, B = %d\n", b);
     set_rgb(led_mode->get_r(), led_mode->get_g(), b);
 }
+
+uint8_t LedController::get_r() { return led_mode->get_r(); }
+uint8_t LedController::get_g() { return led_mode->get_g(); }
+uint8_t LedController::get_b() { return led_mode->get_b(); }
 
 void LedController::set_hsv(uint8_t hue, uint8_t saturation, uint8_t value) {
     Serial.printf("LedController: Function: set_hsv, H = %d, S = %d, V = %d\n", hue, saturation, value);

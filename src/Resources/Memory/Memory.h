@@ -12,6 +12,9 @@ public:
     void write_str(const String& key, const String& value);
     String read_str(const String& key) const;
 
+    void write_byte(const String& key, uint8_t value);
+    uint8_t read_byte(const String& key) const;
+
     void write_bit(const String& key, uint8_t bit, bool value);
     bool read_bit(const String& key, uint8_t bit) const;
 };

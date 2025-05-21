@@ -19,6 +19,8 @@ public:
     uint8_t get_target_value() const;
     uint8_t get_start_value() const;
 
+    void set_transition_delay(uint32_t new_transition_delay);
+
 private:
     LedController* led_controller;
     AsyncTimer<uint8_t>* timer;

@@ -6,7 +6,7 @@ SystemController::SystemController(Adafruit_NeoPixel* strip)
   : serial_port(115200)
   , wifi("ESP32-C3-Device")
   , memory(512)
-  , led_controller(strip)
+  , led_controller(strip, memory.read_byte("led_strip_r"), memory.read_byte("led_strip_g"), memory.read_byte("led_strip_b"), memory.read_byte("led_strip_brightness"), memory.read_byte("led_strip_state"), memory.read_byte("led_strip_mode"))
 {
 }
 
@@ -26,7 +26,7 @@ void SystemController::init_system_setup() {
 
     define_commands();
 
-    connect_wifi();
+    wifi_connect();
 
 }
 
@@ -44,12 +44,12 @@ void SystemController::update() {
 // ——— define_commands ———
 void SystemController::define_commands() {
     // populate Wi-Fi commands
-    wifi_commands[0] = { "help",              "Show this help message",                0, [this](auto&){ print_wifi_help(); } };
-    wifi_commands[1] = { "connect",           "Connect or reconnect to WiFi",          0, [this](auto&){ connect_wifi(); } };
+    wifi_commands[0] = { "help",              "Show this help message",                0, [this](auto&){ wifi_print_help(); } };
+    wifi_commands[1] = { "connect",           "Connect or reconnect to WiFi",          0, [this](auto&){ wifi_connect(); } };
     wifi_commands[2] = { "disconnect",        "Disconnect from WiFi",                  0, [this](auto&){ disconnect_wifi(); } };
     wifi_commands[3] = { "reset_credentials", "Clear saved WiFi credentials",          0, [this](auto&){ reset_wifi_credentials(); } };
-    wifi_commands[4] = { "status",            "Show connection status, SSID, IP, MAC", 0, [this](auto&){ print_wifi_credentials(); } };
-    wifi_commands[5] = { "scan",              "List available WiFi networks",          0, [this](auto&){ get_available_wifi_networks(); } };
+    wifi_commands[4] = { "status",            "Show connection status, SSID, IP, MAC", 0, [this](auto&){ wifi_print_credentials(); } };
+    wifi_commands[5] = { "scan",              "List available WiFi networks",          0, [this](auto&){ wifi_get_available_networks(); } };
 
     // populate LED-strip commands
     led_strip_commands[0]  = { "help",           "Show this help message",      0, [this](auto&){ led_strip_print_help(); } };
@@ -93,6 +93,7 @@ void SystemController::led_strip_print_help() {
 void SystemController::led_strip_set_mode(const String& args) {
     uint8_t mode = static_cast<uint8_t>(args.toInt());
     led_controller.set_mode(mode);
+    memory.write_byte("led_strip_mode", mode);
 }
 
 void SystemController::led_strip_set_rgb(const String& args) {
@@ -101,18 +102,24 @@ void SystemController::led_strip_set_rgb(const String& args) {
     uint8_t g = args.substring(i1 + 1, i2).toInt();
     uint8_t b = args.substring(i2 + 1).toInt();
     led_controller.set_rgb(r, g, b);
+    memory.write_byte("led_strip_r", led_controller.get_r());
+    memory.write_byte("led_strip_g", led_controller.get_g());
+    memory.write_byte("led_strip_b", led_controller.get_b());
 }
 
 void SystemController::led_strip_set_r(const String& args) {
     led_controller.set_r(static_cast<uint8_t>(args.toInt()));
+    memory.write_byte("led_strip_r", led_controller.get_r());
 }
 
 void SystemController::led_strip_set_g(const String& args) {
     led_controller.set_g(static_cast<uint8_t>(args.toInt()));
+    memory.write_byte("led_strip_g", led_controller.get_g());
 }
 
 void SystemController::led_strip_set_b(const String& args) {
     led_controller.set_b(static_cast<uint8_t>(args.toInt()));
+    memory.write_byte("led_strip_b", led_controller.get_b());
 }
 
 void SystemController::led_strip_set_hsv(const String& args) {
@@ -121,47 +128,63 @@ void SystemController::led_strip_set_hsv(const String& args) {
     uint8_t s = args.substring(i1 + 1, i2).toInt();
     uint8_t v = args.substring(i2 + 1).toInt();
     led_controller.set_hsv(h, s, v);
+    memory.write_byte("led_strip_r", led_controller.get_r());
+    memory.write_byte("led_strip_g", led_controller.get_g());
+    memory.write_byte("led_strip_b", led_controller.get_b());
 }
 
 void SystemController::led_strip_set_hue(const String& args) {
     led_controller.set_hue(static_cast<uint8_t>(args.toInt()));
+    memory.write_byte("led_strip_r", led_controller.get_r());
+    memory.write_byte("led_strip_g", led_controller.get_g());
+    memory.write_byte("led_strip_b", led_controller.get_b());
 }
 
 void SystemController::led_strip_set_sat(const String& args) {
     led_controller.set_sat(static_cast<uint8_t>(args.toInt()));
+    memory.write_byte("led_strip_r", led_controller.get_r());
+    memory.write_byte("led_strip_g", led_controller.get_g());
+    memory.write_byte("led_strip_b", led_controller.get_b());
 }
 
 void SystemController::led_strip_set_val(const String& args) {
     led_controller.set_val(static_cast<uint8_t>(args.toInt()));
+    memory.write_byte("led_strip_r", led_controller.get_r());
+    memory.write_byte("led_strip_g", led_controller.get_g());
+    memory.write_byte("led_strip_b", led_controller.get_b());
 }
 
 void SystemController::led_strip_set_brightness(const String& args) {
     led_controller.set_brightness(static_cast<uint8_t>(args.toInt()));
+    memory.write_byte("led_strip_brightness", static_cast<uint8_t>(args.toInt()));
 }
 
 void SystemController::led_strip_set_state(const String& args) {
     led_controller.set_state(static_cast<byte>(args.toInt()));
+    memory.write_byte("led_strip_state", static_cast<uint8_t>(args.toInt()));
 }
 
 void SystemController::led_strip_turn_on() {
     led_controller.turn_on();
+    memory.write_byte("led_strip_state", 1);
 }
 
 void SystemController::led_strip_turn_off() {
     led_controller.turn_off();
+    memory.write_byte("led_strip_state", 0);
 }
 
 
 
 //////WIFI/////
-// ——— connect_wifi ———
-bool SystemController::connect_wifi() {
+// ——— wifi_connect ———
+bool SystemController::wifi_connect() {
     serial_port.print_spacer();
 
     String ssid, pwd;
     if (wifi.is_connected()) {
         serial_port.println("Already connected.");
-        print_wifi_credentials();
+        wifi_print_credentials();
         serial_port.println("Use 'wifi reset_credentials' to change network.");
         serial_port.print_spacer();
         return true;
@@ -181,7 +204,7 @@ bool SystemController::connect_wifi() {
         serial_port.println("'...");
 
         if (wifi.connect(ssid, pwd)) {
-            print_wifi_credentials();
+            wifi_print_credentials();
             memory.write_bit("wifi_flags", 0, 1);
             memory.write_str("wifi_name", ssid);
             memory.write_str("wifi_pass", pwd);
@@ -205,8 +228,8 @@ bool SystemController::connect_wifi() {
     return false;
 }
 
-// ——— print_wifi_credentials ———
-void SystemController::print_wifi_credentials() {
+// ——— wifi_print_credentials ———
+void SystemController::wifi_print_credentials() {
     serial_port.print_spacer();
 
     if (!wifi.is_connected()) {
@@ -241,7 +264,7 @@ bool SystemController::read_memory_wifi_credentials(String& ssid, String& pwd) {
     serial_port.println("'...");
 
     if (wifi.connect(ssid, pwd)) {
-        print_wifi_credentials();
+        wifi_print_credentials();
         serial_port.print_spacer();
         return true;
     }
@@ -256,7 +279,7 @@ bool SystemController::prompt_user_for_wifi_credentials(String& ssid, String& pw
     serial_port.print_spacer();
     memory.write_bit("wifi_flags", 0, 0);
 
-    std::vector<String> networks = get_available_wifi_networks();
+    std::vector<String> networks = wifi_get_available_networks();
     serial_port.println("Select network by number:");
     int choice = serial_port.get_int();
 
@@ -324,8 +347,8 @@ bool SystemController::reset_wifi_credentials() {
     return true;
 }
 
-// ——— get_available_wifi_networks ———
-std::vector<String> SystemController::get_available_wifi_networks() {
+// ——— wifi_get_available_networks ———
+std::vector<String> SystemController::wifi_get_available_networks() {
     serial_port.print_spacer();
 
     serial_port.println("Scanning available networks...");
@@ -342,8 +365,8 @@ std::vector<String> SystemController::get_available_wifi_networks() {
     return networks;
 }
 
-// ——— print_wifi_help ———
-void SystemController::print_wifi_help() {
+// ——— wifi_print_help ———
+void SystemController::wifi_print_help() {
     serial_port.print_spacer();
     serial_port.println("WiFi commands:");
     for (size_t i = 0; i < WIFI_CMD_COUNT; ++i) {

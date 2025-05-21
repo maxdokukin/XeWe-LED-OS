@@ -80,6 +80,10 @@ public:
         end_val = new_end_val;
         reset();
     }
+
+    void set_delay(uint32_t new_delay){
+        delay = new_delay;
+    }
 };
 
 #endif  // ASYNCTIMER_H

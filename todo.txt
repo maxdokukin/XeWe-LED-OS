@@ -1,1 +1,3 @@
 - add wifi max len for ssid and pass to match up with the memory
+- add led strip pin and led num update through the terminal
+- maybe brightness should hold the state as well? return 1 as min brightness if the state is off. i see lots of capabilities to encapsulate shit there

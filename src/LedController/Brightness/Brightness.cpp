@@ -42,3 +42,7 @@ void Brightness::set_brightness(uint8_t new_brightness) {
 bool Brightness::is_changing() {
     return timer->is_active();
 }
+
+void Brightness::set_transition_delay(uint32_t new_transition_delay){
+    timer->set_delay(new_transition_delay);
+}

@@ -13,12 +13,7 @@ private:
     LedMode* led_mode;
     Brightness* brightness;
 
-    uint8_t init_r = 255;
-    uint8_t init_g = 0;
-    uint8_t init_b = 255;
-    uint8_t init_brightness = 255;
-
-    uint8_t state = 1;
+    uint8_t state = 0;
     uint16_t num_led = 56;
     uint16_t color_transition_delay = 900;
     uint8_t led_controller_frame_delay = 10;
@@ -27,7 +22,7 @@ public:
     Adafruit_NeoPixel* led_strip;  // Pointer to the LED strip object
 
     // Constructor
-    LedController(Adafruit_NeoPixel* strip);
+    LedController(Adafruit_NeoPixel* strip, uint8_t init_r, uint8_t init_g, uint8_t init_b, uint8_t init_brightness, uint8_t init_state, uint8_t init_mode);
 
     // Main frame update function (called repeatedly in the loop)
     void frame();
@@ -56,6 +51,11 @@ public:
     // Set pixels
     void fill_all(uint8_t r, uint8_t g, uint8_t b);
     void set_all_strips_pixel_color(uint16_t i, uint8_t r, uint8_t g, uint8_t b);
+
+//    getters
+    uint8_t get_r();
+    uint8_t get_g();
+    uint8_t get_b();
 };
 
 #endif  // LEDCONTROLLER_H
