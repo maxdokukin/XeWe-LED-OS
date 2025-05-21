@@ -98,7 +98,7 @@ void LedController::set_b(uint8_t b) {
 }
 
 void LedController::set_hsv(uint8_t hue, uint8_t saturation, uint8_t value) {
-    Serial.printf("LedController: Function: NOT IMPLEMENTEDset_hsv, H = %d, S = %d, V = %d\n", hue, saturation, value);
+    Serial.printf("LedController: Function: set_hsv, H = %d, S = %d, V = %d\n", hue, saturation, value);
     if (!led_mode->is_done()){
         Serial.println("LedController: Still changing previous color");
         return;
@@ -110,10 +110,16 @@ void LedController::set_hsv(uint8_t hue, uint8_t saturation, uint8_t value) {
     uint8_t old_r = led_mode->get_r();
     uint8_t old_g = led_mode->get_g();
     uint8_t old_b = led_mode->get_b();
-//    delete led_mode;
-//    led_mode = new ColorChanging(this, old_r, old_g, old_b, color_transition_delay);
-//    led_mode->set_hsv(hue, saturation, value);
-//    led_mode->hsv_to_rgb();
+//    create temp led controller with to convert to target r,b b
+    LedMode *led_mode_temp;
+    led_mode_temp = new ColorSolid(this);
+    led_mode_temp->set_hsv(hue, saturation, value);
+    uint8_t target_r = led_mode_temp->get_r();
+    uint8_t target_g = led_mode_temp->get_g();
+    uint8_t target_b = led_mode_temp->get_b();
+    delete led_mode_temp;
+    led_mode = new ColorChanging(this, old_r, old_g, old_b, target_r, target_g, target_b, color_transition_delay);
+    led_mode->set_hsv(hue, saturation, value);
 }
 
 void LedController::set_hue(uint8_t hue) {
@@ -167,7 +173,7 @@ void LedController::turn_off() {
 }
 
 void LedController::fill_all(uint8_t r, uint8_t g, uint8_t b) {
-    Serial.printf("LedController: Function: fill_all, R = %d, G = %d, B = %d\n", r, g, b);
+//    Serial.printf("LedController: Function: fill_all, R = %d, G = %d, B = %d\n", r, g, b);
     for (int i = 0; i < num_led; i++) {
         set_all_strips_pixel_color(i, r, g, b);
     }

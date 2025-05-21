@@ -43,9 +43,9 @@ public:
         std::array<uint8_t, 3> current_val;
         for (int i = 0; i < 3; ++i) {
             current_val[i] = static_cast<uint8_t>(start_val[i] + (end_val[i] - start_val[i]) * progress);
-            Serial.print(i); Serial.print("   "); Serial.print(current_val[i]); Serial.print(" | ");
+//            Serial.print(i); Serial.print("   "); Serial.print(current_val[i]); Serial.print(" | ");
         }
-        Serial.println();
+//        Serial.println();
         return current_val;
     }
 
