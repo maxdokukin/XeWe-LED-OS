@@ -1,9 +1,18 @@
 #include "ColorChanging.h"
 
-ColorChanging::ColorChanging(LedController* controller, uint8_t current_r, uint8_t current_g, uint8_t current_b, uint8_t target_r, uint8_t target_g, uint8_t target_b, uint32_t time)
+ColorChanging::ColorChanging(LedController* controller, uint8_t current_r, uint8_t current_g, uint8_t current_b, uint8_t target_t0, uint8_t target_t1, uint8_t target_t2, char mode, uint32_t time)
     : LedMode(controller) {
+
     uint8_t current_rgb[3] = {current_r, current_g, current_b};
-    uint8_t target_rgb[3] = {target_r, target_g, target_b};
+    if (mode == 'r') {
+        set_rgb(target_t0, target_t1, target_t2);
+    }
+    else if (mode == 'h') {
+        set_hsv(target_t0, target_t1, target_t2);
+    }
+
+    uint8_t target_rgb[3] = {get_r(), get_g(), get_b()};
+
     timer = new AsyncTimerArray(time, current_rgb, target_rgb);
     timer->initiate();
 }
