@@ -30,15 +30,19 @@
   - Select your WiFi network using the number
   - Enter password
   - Done!
+
+### Command Line Tool Control
+  - Allows you to control the ESP32 with commands from the Serial Port
+    - Commands must follow the structure: ```$<cmd_group> <cmd_name> <<param_0> <param_1> ... <param_n>>```
+    - Parameters have the range 0-255: ```$led set_brightness <0-255>```
+    - Parameters must be separated with a space: ```$led set_rgb <0-255> <0-255> <0-255>```
+  - To see all commands available type ```$help```
   - To see wifi commands available type ```$wifi help```
+  - To see led commands available type ```$led help```
 
 ### Control LED Strip
-  - If it is your first startup type ```$led reset``` to reset the EEPROM memory
-  - Type ```$led help``` to see commands available
-  - All the parameters have the range 0-255: ```$led set_brightness <0-255>```
-  - All the parameters must be separated with a space: ```$led set_rgb <0-255> <0-255> <0-255>```
+  - IMPORTANT: If it is your first startup type ```$led reset``` to reset the EEPROM memory; you will see pale green color 
   - Example: 
     - Set led to red: ```$led set_rgb 255 0 0```
     - Set brightness to 50%: ```$led set_brightness 127```
     - Turn on: ```$led turn_on```
-    - 
