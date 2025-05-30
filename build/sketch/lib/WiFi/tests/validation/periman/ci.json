@@ -1,0 +1,10 @@
+#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/tests/validation/periman/ci.json"
+{
+  "platforms": {
+    "qemu": false,
+    "wokwi": false
+  },
+  "targets": {
+    "esp32p4": false
+  }
+}

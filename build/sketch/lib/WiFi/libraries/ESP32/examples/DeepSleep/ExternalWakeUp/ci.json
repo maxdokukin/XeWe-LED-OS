@@ -1,0 +1,9 @@
+#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/libraries/ESP32/examples/DeepSleep/ExternalWakeUp/ci.json"
+{
+  "targets": {
+    "esp32c3": false,
+    "esp32c6": false,
+    "esp32h2": false,
+    "esp32p4": false
+  }
+}

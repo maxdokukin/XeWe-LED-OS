@@ -1,0 +1,7 @@
+#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/libraries/SimpleBLE/examples/SimpleBleDevice/ci.json"
+{
+  "requires": [
+    "CONFIG_BT_ENABLED=y",
+    "CONFIG_BLUEDROID_ENABLED=y"
+  ]
+}

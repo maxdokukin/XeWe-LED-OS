@@ -1,0 +1,9 @@
+#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/tests/validation/psram/ci.json"
+{
+  "platforms": {
+    "qemu": false
+  },
+  "requires": [
+    "CONFIG_SPIRAM=y"
+  ]
+}
