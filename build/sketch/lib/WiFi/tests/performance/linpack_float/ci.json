@@ -1,7 +1,0 @@
-#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/tests/performance/linpack_float/ci.json"
-{
-  "platforms": {
-    "qemu": false,
-    "wokwi": false
-  }
-}

@@ -1,6 +1,0 @@
-#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/libraries/USB/examples/USBSerial/ci.json"
-{
-  "requires": [
-    "CONFIG_SOC_USB_OTG_SUPPORTED=y"
-  ]
-}

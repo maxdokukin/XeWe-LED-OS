@@ -1,6 +1,0 @@
-#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/libraries/PPP/examples/PPP_Basic/ci.json"
-{
-  "requires": [
-    "CONFIG_LWIP_PPP_SUPPORT=y"
-  ]
-}

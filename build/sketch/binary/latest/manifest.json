@@ -1,0 +1,13 @@
+#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/binary/latest/manifest.json"
+{
+  "name": "XeWe-LedOS",
+  "version": "latest",
+  "products": [
+    {
+      "platform": "ESP32C3",
+      "flash_size": "4MB",
+      "build": "firmware.bin",
+      "download": "firmware.bin"
+    }
+  ]
+}

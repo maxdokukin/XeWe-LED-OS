@@ -1,6 +1,0 @@
-#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/libraries/ESP32/examples/Touch/TouchInterrupt/ci.json"
-{
-  "requires": [
-    "CONFIG_SOC_TOUCH_SENSOR_SUPPORTED=y"
-  ]
-}

@@ -1,6 +1,0 @@
-#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/libraries/Wire/examples/WireMaster/ci.json"
-{
-  "requires": [
-    "CONFIG_SOC_I2C_SUPPORTED=y"
-  ]
-}

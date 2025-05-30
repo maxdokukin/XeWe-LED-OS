@@ -1,7 +1,0 @@
-#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/tests/validation/gpio/ci.json"
-{
-  "platforms": {
-    "hardware": false,
-    "qemu": false
-  }
-}

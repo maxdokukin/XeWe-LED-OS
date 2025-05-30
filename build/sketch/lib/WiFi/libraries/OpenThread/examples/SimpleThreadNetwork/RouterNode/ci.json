@@ -1,7 +1,0 @@
-#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/libraries/OpenThread/examples/SimpleThreadNetwork/RouterNode/ci.json"
-{
-  "requires": [
-    "CONFIG_OPENTHREAD_ENABLED=y",
-    "CONFIG_SOC_IEEE802154_SUPPORTED=y"
-  ]
-}

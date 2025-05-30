@@ -1,6 +1,0 @@
-#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/idf_component_examples/hw_cdc_hello_world/ci.json"
-{
-  "requires": [
-    "CONFIG_SOC_USB_SERIAL_JTAG_SUPPORTED=y"
-  ]
-}

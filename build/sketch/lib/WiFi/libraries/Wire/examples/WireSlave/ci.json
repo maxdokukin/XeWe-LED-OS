@@ -1,6 +1,0 @@
-#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/libraries/Wire/examples/WireSlave/ci.json"
-{
-  "requires": [
-    "CONFIG_SOC_I2C_SUPPORT_SLAVE=y"
-  ]
-}

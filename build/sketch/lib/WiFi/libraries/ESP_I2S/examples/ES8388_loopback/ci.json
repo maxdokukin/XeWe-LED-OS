@@ -1,7 +1,0 @@
-#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/libraries/ESP_I2S/examples/ES8388_loopback/ci.json"
-{
-  "requires": [
-    "CONFIG_SOC_I2S_SUPPORTED=y",
-    "CONFIG_SOC_I2C_SUPPORTED=y"
-  ]
-}

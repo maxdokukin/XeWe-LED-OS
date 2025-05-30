@@ -1,6 +1,0 @@
-#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/libraries/ESP32/examples/Touch/TouchButton/ci.json"
-{
-  "requires": [
-    "CONFIG_SOC_TOUCH_VERSION_1=y"
-  ]
-}

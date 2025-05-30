@@ -1,6 +1,0 @@
-#line 1 "/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/lib/WiFi/libraries/ESP_NOW/examples/ESP_NOW_Network/ci.json"
-{
-  "requires": [
-    "CONFIG_SOC_WIFI_SUPPORTED=y"
-  ]
-}
