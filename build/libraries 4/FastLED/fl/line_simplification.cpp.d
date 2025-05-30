@@ -1,0 +1,24 @@
+/Users/xewe/Documents/Programming/Arduino/XeWe-LedOS/build/libraries/FastLED/fl/line_simplification.cpp.o: \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/line_simplification.cpp \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/line_simplification.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/bitset.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/bitset_dynamic.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/math_macros.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/type_traits.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/namespace.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/variant.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/inplacenew.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/math.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/clamp.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/force_inline.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/map_range.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/pair.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/point.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/geometry.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/slice.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/vector.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/functional.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/ptr.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/scoped_ptr.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/template_magic.h \
+ /Users/xewe/Documents/Arduino/libraries/FastLED/src/fl/insert_result.h
