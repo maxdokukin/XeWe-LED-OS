@@ -1,12 +1,13 @@
 {
   "name": "XeWe-LedOS",
   "version": "latest",
-  "products": [
+  "new_install_improv_wait_time": 0,
+  "builds": [
     {
-      "platform": "ESP32C3",
-      "flash_size": "4MB",
-      "build": "firmware.bin",
-      "download": "firmware.bin"
+      "chipFamily": "ESP32-C3",
+      "parts": [
+        { "path": "firmware.bin", "offset": 0 }
+      ]
     }
   ]
 }
