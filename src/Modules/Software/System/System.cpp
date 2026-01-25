@@ -5,7 +5,7 @@
  *  See: LICENSE and LICENSE-NO-AI.md in the project root for full terms.
  *
  *  Required Notice: Copyright 2025 Maxim Dokukin (https://maxdokukin.com)
- *  https://github.com/maxdokukin/xewe-os
+ *  https://github.com/maxdokukin/xewe-led-os
  *********************************************************************************/
 // src/Modules/Software/System/System.cpp
 
@@ -104,7 +104,7 @@ System::System(SystemController& controller)
 void System::begin_routines_required (const ModuleConfig& cfg) {
     this->controller.serial_port.print_header(
         string("XeWe OS") + "\\sep" +
-        "https://github.com/maxdokukin/xewe-os" + "\\sep" +
+        "https://github.com/maxdokukin/xewe-led-os" + "\\sep" +
         "Version " + TO_STRING(BUILD_VERSION) + "\n" +
         "Build Timestamp " + TO_STRING(BUILD_TIMESTAMP)
     );
