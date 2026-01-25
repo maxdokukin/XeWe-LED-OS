@@ -1,142 +1,108 @@
-# XeWe OS
+# XeWe Led OS
 
----
+-----
+#### The ultimate LED Strip Software for ESP32
 
-<img src="static/media/resources/readme/boot_log.webp" style="max-width:300px;width:100%;height:auto;">
+-----
+# The problem
+I have built many LED applications. In-between them I had a lot of repetitive work that I decided to distill in one piece of software-- Led OS  
 
+# Features:
+- CLI commands via Serial Port to control addressable LED strip
+- WiFi connectivity that allows
+    - Local Web Server for control via the web browser on the same network
+    - Alexa voice + app control (requires Alexa Speaker)
+    - Apple HomeKit + Siri control (requires hub: Apple TV or Speaker)
+- Physical buttons support
+- CLI commands via Serial Port for dynamic configuration
 
----
+# Supported Hardware
+- ESP32 C3, ESP32 C6, ESP32 S3
+![IMG_2737.webp](static/media/resources/readme/IMG_2737.webp)
 
-## The Idea
-
-I noticed that in many ESP/Arduino projects I write the same code again and again.
-This project aims to boil it down to one reusable base of tools that make ESP and Arduino development flow easier.
-
-Of course, what constitutes "basic functionality" is very subjective, and some might call this project bloatware.
-**One man's boilerplate is another man's bloatware.**
-
-## Core Features
-
-**Modular Design:** The system allows easy custom code integration on top of existing functionality. Features are independent units that can be configured, persisted to NVS, and controlled via the CLI.
-
-### Core Modules
-
-* **System Module:** Holds major system-related CLI commands and acts as the kernel.
-* **SerialPort Module:** Robust serial read/write functionality with non-blocking I/O.
-* **NVS Module:** Easy interaction with ESP32 Non-Volatile Storage to save settings across reboots.
-* **Command Parser:** Parses text streams into actionable software behaviors.
-
-### Optional Modules
-
-* **Pins:** Direct hardware abstraction for GPIO, ADC, PWM, and I2C.
-* **Buttons:** Binds physical buttons to command execution with software debouncing.
-* **Wifi:** Manages network connections.
-* **Web Interface:** Allows sending commands from devices on the same WiFi network.
-
-To see all modules and commands: [MODULES.md](doc/MODULES.md)
-
----
-## How You Can Benefit
-If you are developing/vibe-coding a ESP application, this project is a great starting point. It allows to keep work in independent modules, to make it reusable and maintainable.   
-
-So for example, if you want to control a PWM fan via web browser, you can just implement Fan Module, without worrying about Wifi and pwm.
-
-## Quickstart
-
-### Option 1: The Easy Way (Web Flasher)
-
-Upload a precompiled binary file directly from your browser:
-
-1. Go to **[maxdokukin.com/projects/xewe-os](https://maxdokukin.com/projects/xewe-os)**
-2. Scroll down to **Firmware Flasher**.
-3. Connect your board and follow the instructions.
-
-### Option 2: Build from Source
-
-To build and upload the code manually using the provided scripts:
-
-```bash
-cd build/scripts
-./setup_build_enviroment.sh
-
-# Syntax: ./build.sh -t <target_chip> -p <port>
-./build.sh -t c3 -p /dev/cu.usbmodem11143201
-
-```
-
----
-
+# About the Features:
 ## CLI Interface
+This is a handy way to have a high level control over the LEDs.
+You can send multiple commands to configure the state of LEDs.
+You can also use another devices to automatically send the commands via serial port.
 
-This framework provides a handy way to have high-level control over the device at runtime. You can use the Serial Monitor or other devices (via Web/WiFi) to automatically send commands.
+Commands must follow the structure: $<cmd_group> <cmd_name> <<param_0> <param_1> ... <param_n>>   
+Parameters have the range 0-255: $led set_brightness <0-255>   
+Parameters must be separated with a space: $led set_rgb <0-255> <0-255> <0-255>   
 
-To see all modules and commands: [MODULES.md](doc/MODULES.md)
+- To see all commands available type $help
+- To see system commands available type $system help
+- To see wifi commands available type $wifi help
+- To see led commands available type $led help
 
-### Syntax
+## Web Interface UI
 
-Commands must follow the structure:
-`$<cmd_group> <cmd_name> <param_0> <param_1> ...`
+## Apple Homekit Support
 
-* **Prefix:** All commands start with `$`.
-* **Spacing:** Parameters must be separated by a space.
-* **Help:** To see all commands available, type `$help`. To see system commands, type `$system`.
+## Alexa
 
-### Some examples
+## Buttons
 
-```bash
-# 1. Get chip model and build info
-$system info
+# Quickstart
+## Easy Way
+Upload precompiled software from the website.
+Go to https://maxdokukin.com/projects/xewe-led-os
+![Screenshot 2026-01-17 at 09.44.48.webp](static/media/resources/readme/Screenshot%202026-01-17%20at%2009.44.48.webp)
+Select the port
+![Screenshot 2026-01-17 at 09.49.05.webp](static/media/resources/readme/Screenshot%202026-01-17%20at%2009.49.05.webp)
+Click install
+![Screenshot 2026-01-17 at 09.52.39.webp](static/media/resources/readme/Screenshot%202026-01-17%20at%2009.52.39.webp)
+After installation finishes, got to "Logs & Console"
+![Screenshot 2026-01-17 at 09.53.53.webp](static/media/resources/readme/Screenshot%202026-01-17%20at%2009.53.53.webp)
+Click "Reset Device", this will reboot the board
+![Screenshot 2026-01-17 at 09.54.50.webp](static/media/resources/readme/Screenshot%202026-01-17%20at%2009.54.50.webp)
+Finish by following the Serial Port instructions  
+**NOTE: that sometimes a line of text can go missing.   
+If next step makes no sense, hit "Enter"  
+To avoid this issue, use a more robust Serial Port monitor app at 115200baud**
+![Screenshot 2026-01-17 at 09.55.34.webp](static/media/resources/readme/Screenshot%202026-01-17%20at%2009.55.34.webp)
+You will see "Rebooting..." at the end of the setup
+![Screenshot 2026-01-17 at 10.00.07.webp](static/media/resources/readme/Screenshot%202026-01-17%20at%2010.00.07.webp)
+Done. Try $help to see all commands available
+![Screenshot 2026-01-17 at 10.03.41.webp](static/media/resources/readme/Screenshot%202026-01-17%20at%2010.03.41.webp)
 
-# 2. Toggle the built-in LED (usually GPIO 2)
-$pins gpio_toggle 2
+## Technical Way
+Compile the software yourself using Arduino IDE, or provided script.
 
-# 3. Scan for available WiFi networks
-$wifi scan
+### Arduino IDE
+- Set up IDE for ESP32 development
+- Upload sample sketch to verify that your environment and compiler are right
+- Download libraries:
+  - "FastLED" https://github.com/FastLED/FastLED
+  - "Espalexa" (modified, use Github) https://github.com/maxdokukin/xewe-led-espalexa
+  - "HomeSpan" https://github.com/HomeSpan/HomeSpan
+  - "WebSockets" https://github.com/Links2004/arduinoWebSockets
 
-# 4. Bind the "BOOT" button (GPIO 0) to toggle the LED when pressed
-$buttons add 0 "$pins gpio_toggle 8" pullup on_press 50
-```
+**Note that on Mac with Apple Silicon, you need Arduino IDE Intel edition + Rosetta.
+Otherwise, the ESP32 sketches won't compile or will cause a core dump.**
 
----
+Ensure that your config matches.   
+Values should be exact from "USB CDC on Boot" to "Zigbee Mode":
+![Screenshot 2026-01-17 at 14.02.22.webp](static/media/resources/readme/Screenshot%202026-01-17%20at%2014.02.22.webp)
 
-## Architecture & Development
+### Scripts (the way I do it)
+Will only work on Mac/Linux. 
 
-The system revolves around the `SystemController`, which acts as the manager. It initializes and manages the lifecycle of all `Module` instances.
+- `cd scripts`
+- `./setup_build_enviroment.sh`
+- ./build.sh -t <chip> -p <serial_port>
+- Ex: ./build.sh -t c3 -p /dev/cu.usbmodem11143201
 
-### Directory Structure
 
-```text
-src/
-├── SystemController/   # Kernel/Manager
-├── Modules/            # Feature implementations
-│   ├── Hardware/       # Physical interface (Pins, Buttons)
-│   ├── Software/       # Logic (Wifi, WebInterface, NVS)
-│   └── Module/         # Base class definition
-├── XeWeStringUtils.h   # Zero-allocation string helpers
-└── Debug.h             # Conditional debug macros
 
-```
-For more see [PROJECT_STRUCTURE.md](doc/PROJECT_STRUCTURE.md)
-To add your own module, see [ADDING_A_MODULE.md](doc/ADDING_A_MODULE.md)
 
-### Debugging
+## Software Modularity
+Modules (WiFi, Homekit, ...) can all be enabled or disabled dynamically based on your needs
+For example, if you decided to stop using wifi, type $wifi disable. Alternatively, you can bring a module back by typing $<module> enable.
 
-The project uses `Debug.h` to control verbosity. You can enable debug prints per-module by changing definitions to `1` in `src/Debug.h`:
-
-```cpp
-#define DEBUG_SystemController  0
-#define DEBUG_Pins              1  // <--- Enables debug logs for Pins
-#define DEBUG_Wifi              0
-
-```
-
----
-
-## License
-
-**PolyForm Noncommercial 1.0.0 + No AI Use Addendum v1.0**
-
-* **Non-Commercial**: You may use this software for personal or educational purposes.
-* **No AI**: You may not use this codebase to train AI models.
-
-*Copyright 2026 Maxim Dokukin*
+The list of commands that all modules support:
+- $<module> status
+- $<module> reset
+Some modules can be toggled:
+- $<module> enable
+- $<module> disable
