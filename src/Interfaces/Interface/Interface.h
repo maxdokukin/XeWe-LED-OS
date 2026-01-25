@@ -10,7 +10,7 @@
 // src/Interfaces/Interface/Interface.h
 #pragma once
 
-#include "../Modules/Module/Module.h"
+#include "../../Modules/Module/Module.h"
 
 class Interface : public Module {
 public:

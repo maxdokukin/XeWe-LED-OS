@@ -20,6 +20,7 @@ SystemController::SystemController()
   , buttons(*this)
   , wifi(*this)
   , web_interface(*this)
+  , led_strip(*this)
 {
     modules.push_back(&serial_port);
     modules.push_back(&nvs);
@@ -29,6 +30,10 @@ SystemController::SystemController()
     modules.push_back(&buttons);
     modules.push_back(&wifi);
     modules.push_back(&web_interface);
+    modules.push_back(&led_strip);
+
+    interfaces.push_back(&nvs);
+    interfaces.push_back(&led_strip);
 }
 
 void SystemController::begin() {
@@ -42,6 +47,7 @@ void SystemController::begin() {
     wifi.begin                      (WifiConfig             {});
     web_interface.add_requirement   (wifi);
     web_interface.begin             (WebInterfaceConfig     {});
+    led_strip.begin                 (LedStripConfig         {});
 
     // should be initialized last to collect all cmds
     command_parser.begin            (CommandParserConfig    {});
@@ -62,4 +68,33 @@ void SystemController::loop() {
     if (serial_port.has_line()) {
         command_parser.parse(serial_port.read_line());
     }
+}
+
+void SystemController::sync_color(std::array<uint8_t,3> color, const std::array<uint8_t,INTERFACE_COUNT>& sync_flags) {
+    for_each_interface(sync_flags, [&](auto& interface){ interface.sync_color(color); });
+}
+
+void SystemController::sync_brightness(uint8_t brightness, const std::array<uint8_t,INTERFACE_COUNT>& sync_flags) {
+    for_each_interface(sync_flags, [&](auto& interface){ interface.sync_brightness(brightness); });
+}
+
+void SystemController::sync_state(uint8_t state, const std::array<uint8_t,INTERFACE_COUNT>& sync_flags) {
+    for_each_interface(sync_flags, [&](auto& interface){ interface.sync_state(state); });
+}
+
+void SystemController::sync_mode(uint8_t mode, const std::array<uint8_t,INTERFACE_COUNT>& sync_flags) {
+    for_each_interface(sync_flags, [&](auto& interface){ interface.sync_mode(mode); });
+}
+
+void SystemController::sync_length(uint16_t length, const std::array<uint8_t,INTERFACE_COUNT>& sync_flags) {
+    for_each_interface(sync_flags, [&](auto& interface){ interface.sync_length(length); });
+}
+
+void SystemController::sync_all(std::array<uint8_t,3> color,
+                                uint8_t brightness,
+                                uint8_t state,
+                                uint8_t mode,
+                                uint16_t length,
+                                const std::array<uint8_t,INTERFACE_COUNT>& sync_flags) {
+    for_each_interface(sync_flags, [&](auto& interface){ interface.sync_all(color, brightness, state, mode, length); });
 }

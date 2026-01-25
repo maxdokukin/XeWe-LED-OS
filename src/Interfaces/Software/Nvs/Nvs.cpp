@@ -16,7 +16,7 @@
 #include "../../../SystemController/SystemController.h"
 
 Nvs::Nvs(SystemController& controller)
-      : Module(controller,
+      : Interface(controller,
                /* module_name         */ "Nvs",
                /* module_description  */ "Stores user settings even when the power is off",
                /* nvs_key             */ "nvs",
@@ -25,6 +25,45 @@ Nvs::Nvs(SystemController& controller)
                /* has_cli_cmds        */ false)
 {}
 
+void Nvs::sync_color(std::array<uint8_t,3> color) {
+    DBG_PRINTF(Nvs, "sync_color(): R=%u, G=%u, B=%u\n", color[0], color[1], color[2]);
+    write_uint8(nvs_key, "led_r", color[0]);
+    write_uint8(nvs_key, "led_g", color[1]);
+    write_uint8(nvs_key, "led_b", color[2]);
+}
+
+void Nvs::sync_brightness(uint8_t brightness) {
+    DBG_PRINTF(Nvs, "sync_brightness(): brightness=%u\n", brightness);
+    write_uint8(nvs_key, "led_bri", brightness);
+}
+
+void Nvs::sync_state(uint8_t state) {
+    DBG_PRINTF(Nvs, "sync_state(): state=%s\n", static_cast<bool>(state) ? "ON" : "OFF");
+    write_bool(nvs_key, "led_state", static_cast<bool>(state));
+}
+
+void Nvs::sync_mode(uint8_t mode) {
+    DBG_PRINTF(Nvs, "sync_mode(): mode=%u\n", mode);
+    write_uint8(nvs_key, "led_mode", mode);
+}
+
+void Nvs::sync_length(uint16_t length) {
+    DBG_PRINTF(Nvs, "sync_length(): length=%u\n", length);
+    write_uint16(nvs_key, "led_len", length);
+}
+
+void Nvs::sync_from_memory(std::array<uint8_t,5> sync_flags) {
+    DBG_PRINTLN(Nvs, "sync_from_memory(): Reading all parameters from NVS and applying to controller.");
+    controller.sync_all(
+        { read_uint8(nvs_key, "led_r"), read_uint8(nvs_key, "led_g"), read_uint8(nvs_key, "led_b") },
+        read_uint8(nvs_key, "led_bri"),
+        read_bool(nvs_key, "led_state"),
+        read_uint8(nvs_key, "led_mode"),
+        read_uint16(nvs_key, "led_len", LED_STRIP_NUM_LEDS_MAX),
+        sync_flags
+    );
+    DBG_PRINTLN(Nvs, "sync_from_memory(): Sync from memory complete.");
+}
 
 void Nvs::reset (const bool verbose, const bool do_restart, const bool keep_enabled) {
     DBG_PRINTLN(Nvs, "reset(): Clearing all stored preferences.");

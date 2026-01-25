@@ -7,16 +7,13 @@
  *  Required Notice: Copyright 2025 Maxim Dokukin (https://maxdokukin.com)
  *  https://github.com/maxdokukin/xewe-led-os
  *********************************************************************************/
+// src/Interfaces/Software/Nvs.h
 
-// src/Modules/Nvs/Nvs.h
 #pragma once
 
-#include "../../Module/Module.h"
+#include "../../Interface/Interface.h"
 
 #include <Preferences.h>
-//#include <array>
-//#include <string_view>
-//#include <string>
 #include <nvs.h>
 #include <nvs_flash.h>
 
@@ -24,9 +21,16 @@
 struct NvsConfig : public ModuleConfig {};
 
 
-class Nvs : public Module {
+class Nvs : public Interface {
 public:
     explicit                    Nvs                         (SystemController& controller);
+
+    // required implementation
+    void                        sync_color                  (std::array<uint8_t,3> color)   override;
+    void                        sync_brightness             (uint8_t brightness)            override;
+    void                        sync_state                  (uint8_t state)                 override;
+    void                        sync_mode                   (uint8_t mode)                  override;
+    void                        sync_length                 (uint16_t length)               override;
 
     // optional implementation
     void                        reset                       (const bool verbose=false,
@@ -63,6 +67,8 @@ public:
     bool                        read_bool                   (string_view ns,
                                                              string_view key,
                                                                bool default_value = false);
+
+    void                        sync_from_memory            (std::array<uint8_t,5> sync_flags);
 
 private:
     static constexpr size_t     MAX_KEY_LEN                 = 15;

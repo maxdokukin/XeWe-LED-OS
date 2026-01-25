@@ -8,8 +8,13 @@
  *  https://github.com/maxdokukin/XeWe-LED-OS
  *********************************************************************************/
 
+#define PIN_LED_STRIP               2
+#define LED_STRIP_TYPE              WS2812
+#define LED_STRIP_COLOR_ORDER       GRB
+#define LED_STRIP_NUM_LEDS_MAX      600
 
-
-// DEVELOPMENT
-#define SAMPLE_CONFIG_DEFINITION 1
+//#define PIN_LED_STRIP               0
+//#define LED_STRIP_TYPE              WS2815
+//#define LED_STRIP_COLOR_ORDER       RGB
+//#define LED_STRIP_NUM_LEDS_MAX      600
 
