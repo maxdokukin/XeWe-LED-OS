@@ -1,0 +1,3 @@
+#pragma once
+#define BUILD_VERSION   1.0.100
+#define BUILD_TIMESTAMP 2026-01-25T19:19:43Z
