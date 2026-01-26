@@ -7,9 +7,6 @@
  *  Required Notice: Copyright 2025 Maxim Dokukin (https://maxdokukin.com)
  *  https://github.com/maxdokukin/XeWe-LED-OS
  *********************************************************************************/
-
-
-
 // src/Interfaces/LedStrip/LedStrip.cpp
 
 #include "LedStrip.h"
