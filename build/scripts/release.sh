@@ -166,8 +166,11 @@ for CHIP in "${TARGET_CHIPS[@]}"; do
       TARGET_DIR="${BUILDS_DIR}/${BUILD_DIR_NAME}"
 
       echo "      Compile → ${BUILD_DIR_NAME}"
-      # Suppress stdout to keep logs clean, allow stderr
-      "${SCRIPT_DIR}/compile.sh" \
+
+      # --- TRY / CATCH START ---
+      # Execute compile.sh in a conditional check.
+      # If it returns non-zero, the code inside the block runs.
+      if ! "${SCRIPT_DIR}/compile.sh" \
           -t "${CHIP}" \
           --project-root "${PROJECT_ROOT}" \
           --builds-dir "${BUILDS_DIR}" \
@@ -176,7 +179,13 @@ for CHIP in "${TARGET_CHIPS[@]}"; do
           --project-name "${CURRENT_PROJECT_NAME}" \
           --version "${INPUT_VER}" \
           --timestamp "${TS_ISO}" \
-          --venv "${DEFAULT_VENV}" > /dev/null
+          --venv "${DEFAULT_VENV}" > /dev/null; then
+
+          echo "⚠️  [SKIP] Compilation failed for Pin ${PIN_ITEM} (Likely invalid). Continuing..."
+          # This jumps to the next iteration of the inner 'for' loop
+          continue
+      fi
+      # --- TRY / CATCH END ---
 
       # --- Add Release Notes ---
       NOTES_DEST_DIR="${TARGET_DIR}/binary"
