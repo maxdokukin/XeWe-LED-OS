@@ -106,23 +106,19 @@ void Homekit::begin_routines_init (const ModuleConfig& cfg) {
     controller.serial_port.print("If using Mac, go to the Home App and add device\nusing code 4663-7726");
     controller.serial_port.print("\nThe setup process will continue automatically\nafter device is pared with HomeKit");
 
-    bool pairing = true;
     controller.serial_port.print("TO ABORT PRESS (x): ");
-    while(hs_status != 3 && pairing) {
+    while(hs_status != 3) {
         homeSpan.poll();
         controller.serial_port.loop();
         if (controller.serial_port.has_line()){
             std::string input = controller.serial_port.read_line();
-            if (input[0] == 'x')
-                pairing = false;
+            if (input[0] == 'x') {
+                disable(false, true); // reset with no verbose and restart
+                return;
+            }
             else
-            controller.serial_port.print("\n(x)?: ");
+                controller.serial_port.print("\n(x)?: ");
         }
-    }
-
-    if (!pairing) { //pairing was terminated
-        disable(false, false); // reset with no verbose and no restart
-        return;
     }
 
     controller.serial_port.print("Setting up HomeKit");
@@ -136,7 +132,6 @@ void Homekit::loop () {
 }
 
 void Homekit::reset (const bool verbose, const bool do_restart, const bool keep_enabled) {
-    if (is_disabled()) return;
     if (verbose) controller.serial_port.print("You also need to remove the device from the Home App manually");
     homeSpan.processSerialCommand("F");
     delay(100);
