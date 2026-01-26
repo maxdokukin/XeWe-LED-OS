@@ -147,7 +147,6 @@ LedStrip::~LedStrip() {
     DBG_PRINTLN(LedStrip, "<- LedStrip::~LedStrip()");
 }
 
-
 void LedStrip::sync_color(std::array<uint8_t,3> color) { set_rgb(color); }
 
 void LedStrip::sync_brightness(uint8_t brightness) { set_brightness(brightness); }
@@ -177,28 +176,16 @@ void LedStrip::begin_routines_required (const ModuleConfig& cfg) {
 }
 
 void LedStrip::begin_routines_init (const ModuleConfig& cfg) {
-    int led_num_entry = 0;
-
-    while (true) {
-        led_num_entry = controller.serial_port.get_int("How many LEDs do you have connected?\nEnter a number: ");
-        if (led_num_entry < 0) {
-            controller.serial_port.print("LED number must be greater than 0");
-        } else if (led_num_entry > LED_STRIP_NUM_LEDS_MAX) {
-            controller.serial_port.printf("That's too many. Max supported LED: %u\n", LED_STRIP_NUM_LEDS_MAX);
-        } else if (led_num_entry <= LED_STRIP_NUM_LEDS_MAX){
-            this->num_led = led_num_entry;
-            controller.sync_all(
-                    {0, 255,  0},
-                    50,
-                    1,
-                    0,
-                    this->num_led,
-                    {true, true, false, false, false} //only write to nvs and led
-                );
-            break;
-        }
-    }
-    controller.serial_port.print("\nLED strip is set to green\n"
+    this->num_led = get_int("How many LEDs do you have connected", 0, LED_STRIP_NUM_LEDS_MAX + 1);
+    controller.sync_all(
+        {0, 255,  0},
+        50,
+        1,
+        0,
+        this->num_led,
+        {true, true, false, false, false} //only write to nvs and led
+    );
+    controller.serial_port.print("\nLED strip is set to green"
                                    "If you don't see the green color check the\n"
                                    "pin (GPIO), led type, and color order\n\n"
                                    "LED setup success!");
@@ -265,10 +252,7 @@ void LedStrip::reset (const bool verbose, const bool do_restart, const bool keep
 
 std::string LedStrip::status (const bool verbose) const {
     std::stringstream status_stream;
-    status_stream << "+------------------------------------------------+\n"
-                  << "|                LED Strip Status                |\n"
-                  << "+------------------------------------------------+\n"
-                  << "Hardware Config (firmware):\n"
+    status_stream << "Hardware Setting:\n"
                   << "    Pin:          GPIO" << static_cast<int>(PIN_LED_STRIP) << "\n"
                   << "    Type:         " << TO_STRING(LED_STRIP_TYPE) << "\n"
                   << "    Color Order:  " << TO_STRING(LED_STRIP_COLOR_ORDER) << "\n"
@@ -284,7 +268,6 @@ std::string LedStrip::status (const bool verbose) const {
                   << static_cast<int>(get_r()) << ", "
                   << static_cast<int>(get_g()) << ", "
                   << static_cast<int>(get_b()) << ")\n"
-                  << "+------------------------------------------------+\n";
     std::string status_string = status_stream.str();
     if (verbose) controller.serial_port.print(status_string.c_str());
     return status_string;

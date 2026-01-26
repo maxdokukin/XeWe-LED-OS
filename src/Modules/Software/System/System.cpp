@@ -28,7 +28,7 @@ System::System(SystemController& controller)
         "Restart the ESP",
         string("$") + lower(module_name) + " restart",
         0,
-        [this](string_view) { ESP.restart(); }
+        [this](string_view) { restart(1000); }
     });
 
     commands_storage.push_back({
@@ -36,7 +36,7 @@ System::System(SystemController& controller)
         "Restart the ESP",
         string("$") + lower(module_name) + " reboot",
         0,
-        [this](string_view) { ESP.restart(); }
+        [this](string_view) { restart(1000); }
     });
 
     commands_storage.push_back({
