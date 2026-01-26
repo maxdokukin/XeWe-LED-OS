@@ -14,16 +14,11 @@
 
 // core
 #define DEBUG_Module            0
-#define DEBUG_Interface         0
-
-#define DEBUG_Buttons           0
-#define DEBUG_Pins              0
-#define DEBUG_CommandParser     0
-#define DEBUG_Nvs               0
 #define DEBUG_SerialPort        0
 #define DEBUG_System            0
-#define DEBUG_WebInterface      0
+#define DEBUG_CommandParser     0
 #define DEBUG_Wifi              0
+#define DEBUG_Buttons           0
 
 // Led
 #define DEBUG_AsyncTimer        0
@@ -35,6 +30,13 @@
 #define DEBUG_ColorChanging     0
 #define DEBUG_LedMode           0
 #define DEBUG_LedStrip          0
+
+// Interfaces
+#define DEBUG_Interface         0
+#define DEBUG_Nvs               0
+#define DEBUG_WebInterface      0
+#define DEBUG_Homekit           0
+#define DEBUG_Alexa             0
 
 
 #define DBG_ENABLED(cls)      (DEBUG_##cls)

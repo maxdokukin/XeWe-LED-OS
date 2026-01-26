@@ -28,6 +28,7 @@ public:
     explicit                    System                      (SystemController& controller);
 
     void                        begin_routines_required     (const ModuleConfig& cfg)       override;
+    void                        begin_routines_init         (const ModuleConfig& cfg)       override;
     void                        reset                       (const bool verbose=false,
                                                              const bool do_restart=true,
                                                              const bool keep_enabled=true)    override;

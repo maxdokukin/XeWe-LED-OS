@@ -18,8 +18,8 @@
 #include <type_traits>
 #include <cstdarg>
 
-#define STRINGIFY(x) #x
-#define TO_STRING(x) STRINGIFY(x)
+#define STRINGIFY_XEWE(x) #x
+#define TO_STRING(x) STRINGIFY_XEWE(x)
 
 namespace xewe::str {
 

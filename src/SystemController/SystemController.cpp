@@ -19,7 +19,7 @@ SystemController::SystemController()
   , led_strip(*this)
   , wifi(*this)
   , web_interface(*this)
-  //hk
+  , homekit(*this)
   //alexa
   , buttons(*this)
 {
@@ -30,14 +30,14 @@ SystemController::SystemController()
     modules.push_back(&led_strip);
     modules.push_back(&wifi);
     modules.push_back(&web_interface);
-    //hk
+    modules.push_back(&homekit);
     //alexa
     modules.push_back(&buttons);
 
     interfaces.push_back(&led_strip);
     interfaces.push_back(&nvs);
     interfaces.push_back(&web_interface);
-    //interfaces.push_back(&hk);
+    interfaces.push_back(&homekit);
     //interfaces.push_back(&alexa);
 
 }
@@ -52,7 +52,8 @@ void SystemController::begin() {
     wifi.begin                      (WifiConfig             {});
     web_interface.add_requirement   (wifi);
     web_interface.begin             (WebInterfaceConfig     {});
-    //hk
+    homekit.add_requirement         (wifi);
+    homekit.begin                   (HomekitConfig          {});
     //alexa
     buttons.begin                   (ButtonsConfig          {});
 
@@ -62,6 +63,8 @@ void SystemController::begin() {
         serial_port.print_header("Initial Setup Complete");
         system.restart();
     }
+    nvs.sync_from_memory({false, false, true, true, true});
+
     serial_port.print_header("System Setup Complete");
 }
 
