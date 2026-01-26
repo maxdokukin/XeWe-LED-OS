@@ -121,7 +121,7 @@ void Homekit::begin_routines_init (const ModuleConfig& cfg) {
     }
 
     if (!pairing) { //pairing was terminated
-        reset(false, false); // reset with no verbose and no restart
+        disable(false, false); // reset with no verbose and no restart
         return;
     }
 

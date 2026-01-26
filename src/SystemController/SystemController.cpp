@@ -20,7 +20,7 @@ SystemController::SystemController()
   , wifi(*this)
   , web_interface(*this)
   , homekit(*this)
-  //alexa
+  , alexa(*this)
   , buttons(*this)
 {
     modules.push_back(&serial_port);
@@ -31,15 +31,14 @@ SystemController::SystemController()
     modules.push_back(&wifi);
     modules.push_back(&web_interface);
     modules.push_back(&homekit);
-    //alexa
+    modules.push_back(&alexa);
     modules.push_back(&buttons);
 
     interfaces.push_back(&led_strip);
     interfaces.push_back(&nvs);
     interfaces.push_back(&web_interface);
     interfaces.push_back(&homekit);
-    //interfaces.push_back(&alexa);
-
+    interfaces.push_back(&alexa);
 }
 
 void SystemController::begin() {
@@ -50,11 +49,14 @@ void SystemController::begin() {
     system.begin                    (SystemConfig           {});
     led_strip.begin                 (LedStripConfig         {});
     wifi.begin                      (WifiConfig             {});
+
     web_interface.add_requirement   (wifi);
     web_interface.begin             (WebInterfaceConfig     {});
     homekit.add_requirement         (wifi);
     homekit.begin                   (HomekitConfig          {});
-    //alexa
+    alexa.add_requirement           (wifi);
+    alexa.add_requirement           (web_interface);
+    alexa.begin                     (HomekitConfig          {});
     buttons.begin                   (ButtonsConfig          {});
 
     command_parser.begin            (CommandParserConfig    {});

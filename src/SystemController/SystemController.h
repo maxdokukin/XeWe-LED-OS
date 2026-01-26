@@ -23,7 +23,7 @@
 #include "../Interfaces/Hardware/LedStrip/LedStrip.h"
 #include "../Interfaces/Software/WebInterface/WebInterface.h"
 #include "../Interfaces/Software/Homekit/Homekit.h"
-//#include "../Interfaces/Software/Alexa/Alexa.h"
+#include "../Interfaces/Software/Alexa/Alexa.h"
 
 #include <array>
 #include <vector>
@@ -58,9 +58,10 @@ public:
     CommandParser               command_parser;
     LedStrip                    led_strip;
     Wifi                        wifi;
+
     WebInterface                web_interface;
     Homekit                     homekit;
-    //alexa
+    Alexa                       alexa;
     Buttons                     buttons;
 
 
@@ -77,9 +78,6 @@ template <typename Fn>
 void SystemController::for_each_interface(
     const std::array<uint8_t, INTERFACE_COUNT>& flags, Fn&& fn) {
     for (std::size_t i = 0; i < INTERFACE_COUNT; ++i) {
-
-        if (i >= 4) return;
-
         if (flags[i] && interfaces[i]) {
             std::forward<Fn>(fn)(*interfaces[i]);
         }
