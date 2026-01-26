@@ -42,7 +42,7 @@ SystemController::SystemController()
 }
 
 void SystemController::begin() {
-    bool init_setup_flag = !system.init_setup_complete();
+    bool init_setup_flag = !nvs.read_bool("root", "init_setup_flag");
 
     serial_port.begin               (SerialPortConfig       {});
     nvs.begin                       (NvsConfig              {});
@@ -63,6 +63,7 @@ void SystemController::begin() {
 
     if (init_setup_flag) {
         serial_port.print_header("Initial Setup Complete");
+        nvs.write_bool("root", "init_setup_flag", true);
         system.restart();
     }
     nvs.sync_from_memory({false, false, true, true, true});
