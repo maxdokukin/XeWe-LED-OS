@@ -19,10 +19,10 @@
 // required
 WebInterface::WebInterface(SystemController& controller)
       : Interface(controller,
-               /* module_name         */ "WebInterface",
+               /* module_name         */ "Web_Interface",
                /* module_description  */ "Allows to control LED in web browser from\nany local device",
                /* nvs_key             */ "web",
-               /* requires_init_setup */ true,
+               /* requires_init_setup */ false,
                /* can_be_disabled     */ true,
                /* has_cli_cmds        */ true)
 {}
@@ -89,7 +89,7 @@ void WebInterface::begin_routines_required (const ModuleConfig& cfg) {
 }
 
 void WebInterface::begin_routines_regular (const ModuleConfig& cfg) {
-    controller.serial_port.println("Web Interface now available for the devices\non the " + controller.wifi.get_ssid() +  " WiFi network\nhttp://" + controller.wifi.get_local_ip());
+    controller.serial_port.print("Web Interface now available for the devices\non the " + controller.wifi.get_ssid() +  " WiFi network\nhttp://" + controller.wifi.get_local_ip());
 }
 
 void WebInterface::begin_routines_common (const ModuleConfig& cfg) {
@@ -112,9 +112,9 @@ void WebInterface::loop () {
     }
 }
 
-void WebInterface::reset (const bool verbose, const bool do_restart) {
+void WebInterface::reset (const bool verbose, const bool do_restart, const bool keep_enabled) {
     webSocket.disconnect();
-    Module::reset(verbose, do_restart);  // this will restart the system
+    Module::reset(verbose, do_restart, keep_enabled);
 }
 
 std::string WebInterface::status (const bool verbose) const {
@@ -145,7 +145,7 @@ std::string WebInterface::status (const bool verbose) const {
     out << "  - WebSocket Clients: " << connected_clients << '\n';
     out << "-------------------------";
 
-    if (verbose) controller.serial_port.println(out.str());
+    if (verbose) controller.serial_port.print(out.str());
     return out.str();
 }
 

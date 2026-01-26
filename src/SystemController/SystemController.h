@@ -16,12 +16,14 @@
 #include "../Modules/Software/SerialPort/SerialPort.h"
 #include "../Modules/Software/System/System.h"
 #include "../Modules/Software/CommandParser/CommandParser.h"
-#include "../Modules/Hardware/Buttons/Buttons.h"
 #include "../Modules/Software/Wifi/Wifi.h"
-#include "../Modules/Software/WebInterface/WebInterface.h"
+#include "../Modules/Hardware/Buttons/Buttons.h"
 
 #include "../Interfaces/Software/Nvs/Nvs.h"
 #include "../Interfaces/Hardware/LedStrip/LedStrip.h"
+#include "../Interfaces/Software/WebInterface/WebInterface.h"
+//hk
+//alexa
 
 #include <array>
 #include <vector>
@@ -54,11 +56,13 @@ public:
     Nvs                         nvs;
     System                      system;
     CommandParser               command_parser;
-    Buttons                     buttons;
+    LedStrip                    led_strip;
     Wifi                        wifi;
     WebInterface                web_interface;
+    //hk
+    //alexa
+    Buttons                     buttons;
 
-    LedStrip                    led_strip;
 
     vector<Module*>&            get_modules                 () { return modules; }
 
@@ -74,7 +78,7 @@ void SystemController::for_each_interface(
     const std::array<uint8_t, INTERFACE_COUNT>& flags, Fn&& fn) {
     for (std::size_t i = 0; i < INTERFACE_COUNT; ++i) {
 
-        if (i >= 2) return;
+        if (i >= 3) return;
 
         if (flags[i] && interfaces[i]) {
             std::forward<Fn>(fn)(*interfaces[i]);

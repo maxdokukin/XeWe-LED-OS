@@ -35,7 +35,7 @@ public:
     // optional implementation
     void                        reset                       (const bool verbose=false,
                                                              const bool do_restart=true,
-                                                             const bool keep_enabled=true)    override;
+                                                             const bool keep_enabled=true)  override;
 
     // other methods
     void                        write_str                   (string_view ns,

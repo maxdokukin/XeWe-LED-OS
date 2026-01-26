@@ -12,8 +12,6 @@
 #pragma once
 
 #include "../../Interface/Interface.h"
-#include "../../../Config.h"
-#include "../../../Debug.h"
 
 #include <WebServer.h>
 #include <WebSocketsServer.h>
@@ -27,7 +25,7 @@ struct WebInterfaceConfig : public ModuleConfig {};
 
 class WebInterface : public Interface {
 public:
-    explicit                    WebInterface              (SystemController& controller);
+    explicit                    WebInterface                (SystemController& controller);
 
     // required implementation
     void                        sync_color                  (std::array<uint8_t,3> color)   override;
@@ -42,34 +40,24 @@ public:
                                                              uint8_t state,
                                                              uint8_t mode,
                                                              uint16_t length)               override;
-    void                begin_routines_required     (const ModuleConfig& cfg)       override;
-//    void                begin_routines_init         (const ModuleConfig& cfg)       override;
-    void                begin_routines_regular      (const ModuleConfig& cfg)       override;
-    void                begin_routines_common       (const ModuleConfig& cfg)       override;
-//
-    void                loop                        ()                              override;
-//
-    void                reset                       (const bool verbose=false,
-                                                     const bool do_restart=true)            override;
-//
-//    void                enable                      (const bool verbose=false)      override;
-//    void                disable                     (const bool verbose=false)      override;
-//
-    std::string         status                      (const bool verbose=false)      const override;
-//    bool                is_enabled                  (const bool verbose=false)      const override;
-//    bool                is_disabled                 (const bool verbose=false)      const override;
-//    bool                        init_setup_complete         (const bool verbose=false)      const override;
+    void                        begin_routines_required     (const ModuleConfig& cfg)       override;
+    void                        begin_routines_regular      (const ModuleConfig& cfg)       override;
+    void                        begin_routines_common       (const ModuleConfig& cfg)       override;
+    void                        loop                        ()                              override;
+    void                        reset                       (const bool verbose=false,
+                                                             const bool do_restart=true,
+                                                             const bool keep_enabled=true)  override;
 
-    // other methods
+    std::string                 status                      (const bool verbose=false)      const override;
+
     WebServer&                  get_server                  ()                              { return httpServer; }
+
 private:
-// Web owns its own servers
     WebServer                   httpServer                  {80};
     WebSocketsServer            webSocket                   {81};
 
     uint8_t                     connected_clients           = 0;
 
-    // HTTP handlers
     void                        serveMainPage               ();
     void                        handleSetRequest            ();
     void                        handleSetStateShortcut      ();
@@ -77,16 +65,13 @@ private:
     void                        handleGetModesRequest       ();
     void                        handleGetNameRequest        ();
 
-    // WS handler
     void                        webSocketEvent              (uint8_t num,
                                                              WStype_t type,
                                                              uint8_t* payload,
                                                              size_t length);
 
-    // Broadcast helper
     void                        broadcast                   (const char* payload, size_t length);
 
-    // HTML assets
     static const char           INDEX_HTML                  [] PROGMEM;
     static const char           SET_STATE_HTML              [] PROGMEM;
 

@@ -16,22 +16,30 @@ SystemController::SystemController()
   , nvs(*this)
   , system(*this)
   , command_parser(*this)
-  , buttons(*this)
+  , led_strip(*this)
   , wifi(*this)
   , web_interface(*this)
-  , led_strip(*this)
+  //hk
+  //alexa
+  , buttons(*this)
 {
     modules.push_back(&serial_port);
     modules.push_back(&nvs);
     modules.push_back(&system);
     modules.push_back(&command_parser);
-    modules.push_back(&buttons);
+    modules.push_back(&led_strip);
     modules.push_back(&wifi);
     modules.push_back(&web_interface);
-    modules.push_back(&led_strip);
+    //hk
+    //alexa
+    modules.push_back(&buttons);
 
     interfaces.push_back(&led_strip);
     interfaces.push_back(&nvs);
+    interfaces.push_back(&web_interface);
+    //interfaces.push_back(&hk);
+    //interfaces.push_back(&alexa);
+
 }
 
 void SystemController::begin() {
@@ -40,13 +48,14 @@ void SystemController::begin() {
     serial_port.begin               (SerialPortConfig       {});
     nvs.begin                       (NvsConfig              {});
     system.begin                    (SystemConfig           {});
-    buttons.begin                   (ButtonsConfig          {});
+    led_strip.begin                 (LedStripConfig         {});
     wifi.begin                      (WifiConfig             {});
     web_interface.add_requirement   (wifi);
     web_interface.begin             (WebInterfaceConfig     {});
-    led_strip.begin                 (LedStripConfig         {});
+    //hk
+    //alexa
+    buttons.begin                   (ButtonsConfig          {});
 
-    // should be initialized last to collect all cmds
     command_parser.begin            (CommandParserConfig    {});
 
     if (init_setup_flag) {
