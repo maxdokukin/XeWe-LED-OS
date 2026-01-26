@@ -176,7 +176,7 @@ void LedStrip::begin_routines_required (const ModuleConfig& cfg) {
 }
 
 void LedStrip::begin_routines_init (const ModuleConfig& cfg) {
-    this->num_led = get_int("How many LEDs do you have connected", 0, LED_STRIP_NUM_LEDS_MAX + 1);
+    this->num_led = controller.serial_port.get_int("How many LEDs do you have connected", 0, LED_STRIP_NUM_LEDS_MAX + 1);
     controller.sync_all(
         {0, 255,  0},
         50,
@@ -185,7 +185,7 @@ void LedStrip::begin_routines_init (const ModuleConfig& cfg) {
         this->num_led,
         {true, true, false, false, false} //only write to nvs and led
     );
-    controller.serial_port.print("\nLED strip is set to green"
+    controller.serial_port.print("\nLED strip is set to green\n"
                                    "If you don't see the green color check the\n"
                                    "pin (GPIO), led type, and color order\n\n"
                                    "LED setup success!");
@@ -267,7 +267,8 @@ std::string LedStrip::status (const bool verbose) const {
                   << "    Color (RGB):  ("
                   << static_cast<int>(get_r()) << ", "
                   << static_cast<int>(get_g()) << ", "
-                  << static_cast<int>(get_b()) << ")\n"
+                  << static_cast<int>(get_b()) << ")";
+
     std::string status_string = status_stream.str();
     if (verbose) controller.serial_port.print(status_string.c_str());
     return status_string;
