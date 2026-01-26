@@ -1,17 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# release.sh — Orchestrates a multi-chip release.
-#
-# Workflow:
-#  1. Sets .version_state to RELEASE version.
-#  2. Asks user for Release Notes via VI.
-#  3. Compiles artifacts.
-#  4. Adds notes to the binary folder.
-#  5. Copies ONLY the 'binary' folder to 'static/firmware/releases/<ver>/<build_name>'.
-#  6. Pushes Binaries to 'binaries' branch.
-#  7. Increments .version_state to NEXT version.
-#  8. Commits the new .version_state to 'binaries' branch.
+# release.sh — Orchestrates a multi-chip release with Batch Pin support.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
@@ -21,6 +11,8 @@ BUILD_ROOT="${PROJECT_ROOT}/build"
 BUILDS_DIR="${BUILD_ROOT}/builds"
 WORK_DIR="${BUILDS_DIR}/cache"
 STATE_FILE="${BUILD_ROOT}/builds/.version_state"
+# UPDATED: Points to Config.h in the Project Root
+CONFIG_FILE="${PROJECT_ROOT}/Config.h"
 DEFAULT_VENV="${SCRIPT_DIR}/.venv"
 
 # Static Directory Config
@@ -29,15 +21,40 @@ STATIC_RELEASES_ROOT="${PROJECT_ROOT}/static/firmware/releases"
 REMOTE="origin"
 BRANCH="binaries"
 
-# ---------- 1. Input Validation ----------
-TARGET_CHIPS=("$@")
-[[ ${#TARGET_CHIPS[@]} -eq 0 ]] && { echo "❌ Usage: $0 <chip1> [chip2] ..."; exit 1; }
+# ---------- 1. Argument Parsing ----------
+TARGET_CHIPS=()
+PIN_RANGE=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --pin-range) PIN_RANGE="$2"; shift 2 ;;
+    -*) echo "❌ Unknown option: $1"; exit 1 ;;
+    *)  TARGET_CHIPS+=("$1"); shift ;;
+  esac
+done
+
+if [[ ${#TARGET_CHIPS[@]} -eq 0 ]]; then
+  echo "❌ Usage: $0 <chip1> [chip2] ... [--pin-range start-end]"
+  exit 1
+fi
 
 for chip in "${TARGET_CHIPS[@]}"; do
   [[ "$chip" =~ ^(c3|c6|s3)$ ]] || { echo "❌ Invalid chip: $chip"; exit 1; }
 done
 
-# ---------- 2. Read & Validate Version ----------
+if [[ -n "${PIN_RANGE}" ]]; then
+  if [[ ! "${PIN_RANGE}" =~ ^[0-9]+-[0-9]+$ ]]; then
+      echo "❌ Invalid pin range format. Use START-END (e.g. 1-10)"
+      exit 1
+  fi
+  # Check config existence before starting
+  if [[ ! -f "${CONFIG_FILE}" ]]; then
+      echo "❌ Config file not found at: ${CONFIG_FILE}"
+      exit 1
+  fi
+fi
+
+# ---------- Helpers ----------
 read_kv() { grep -E "^$1=" "$2" | cut -d'=' -f2- || true; }
 write_kv() {
   local file="$1" k="$2" v="$3"
@@ -47,14 +64,22 @@ write_kv() {
     echo "${k}=${v}" >> "${file}"
   fi
 }
+update_pin_config() {
+    local pin="$1"
+    local file="$2"
+    # Regex looks for #define PIN_LED_STRIP [spaces] [digits]
+    sed -i.bak -E "s/^#define PIN_LED_STRIP[[:space:]]+[0-9]+/#define PIN_LED_STRIP              ${pin}/" "${file}" && rm -f "${file}.bak"
+}
+chip_to_family() { case "$1" in c3) echo "ESP32-C3";; c6) echo "ESP32-C6";; s3) echo "ESP32-S3";; esac; }
 
+# ---------- 2. Read & Validate Version ----------
 [[ ! -f "${STATE_FILE}" ]] && { echo "❌ Missing ${STATE_FILE}"; exit 1; }
 
 CUR_MAJOR="$(read_kv MAJOR "${STATE_FILE}")"
 CUR_MINOR="$(read_kv MINOR "${STATE_FILE}")"
 CUR_PATCH="$(read_kv PATCH "${STATE_FILE}")"
-PROJECT_NAME="$(read_kv PROJECT "${STATE_FILE}")"
-[[ -z "${PROJECT_NAME}" ]] && PROJECT_NAME="$(basename "${PROJECT_ROOT}")"
+PROJECT_NAME_ORIG="$(read_kv PROJECT "${STATE_FILE}")"
+[[ -z "${PROJECT_NAME_ORIG}" ]] && PROJECT_NAME_ORIG="$(basename "${PROJECT_ROOT}")"
 
 echo "ℹ️  Current State: ${CUR_MAJOR}.${CUR_MINOR}.${CUR_PATCH}"
 echo -n "🎯 Enter Release Version (X.Y.Z): "
@@ -84,7 +109,7 @@ trap 'rm -f "${NOTES_TMP}"' EXIT
 
 {
   echo "Release Version: ${INPUT_VER}"
-  echo "Project: ${PROJECT_NAME}"
+  echo "Project: ${PROJECT_NAME_ORIG}"
   echo "----------------------------------------"
   echo ""
 } > "${NOTES_TMP}"
@@ -111,36 +136,62 @@ cat > "${BUILD_INFO_H}" <<EOF
 #define BUILD_TIMESTAMP ${TS_ISO}
 EOF
 
-chip_to_family() { case "$1" in c3) echo "ESP32-C3";; c6) echo "ESP32-C6";; s3) echo "ESP32-S3";; esac; }
-
 for CHIP in "${TARGET_CHIPS[@]}"; do
   CHIP_FAMILY="$(chip_to_family "${CHIP}")"
-  # The folder name created in builds/
-  BUILD_DIR_NAME="${TS_SHORT}-${INPUT_VER}-${CHIP_FAMILY}-${PROJECT_NAME}"
-  TARGET_DIR="${BUILDS_DIR}/${BUILD_DIR_NAME}"
 
-  echo; echo "🧱 [${CHIP_FAMILY}] Compiling..."
-  "${SCRIPT_DIR}/compile.sh" -t "${CHIP}" --project-root "${PROJECT_ROOT}" --builds-dir "${BUILDS_DIR}" --work-dir "${WORK_DIR}" --target-dir "${TARGET_DIR}" --project-name "${PROJECT_NAME}" --version "${INPUT_VER}" --timestamp "${TS_ISO}" --venv "${DEFAULT_VENV}"
+  # Determine pins to build
+  if [[ -n "${PIN_RANGE}" ]]; then
+     PIN_START="${PIN_RANGE%-*}"
+     PIN_END="${PIN_RANGE#*-}"
+     PINS_TO_BUILD=($(seq "$PIN_START" "$PIN_END"))
+     echo "🧱 [${CHIP_FAMILY}] Batch processing pins: ${PIN_RANGE}"
+  else
+     PINS_TO_BUILD=("default")
+     echo "🧱 [${CHIP_FAMILY}] Standard build (no pin modification)"
+  fi
 
-  # --- Add Release Notes to Binary Folder ---
-  # We put the notes inside 'binary' so they get copied along with the firmware
-  NOTES_DEST_DIR="${TARGET_DIR}/binary"
-  mkdir -p "${NOTES_DEST_DIR}"
-  cp "${NOTES_TMP}" "${NOTES_DEST_DIR}/release_notes.txt"
+  for PIN_ITEM in "${PINS_TO_BUILD[@]}"; do
 
-  # --- UPDATE: Copy ONLY 'binary' folder to Static ---
-  # Destination: static/firmware/releases/<version>/<build_dir_name>
-  STATIC_DEST="${STATIC_RELEASES_ROOT}/${INPUT_VER}/${BUILD_DIR_NAME}"
+      # Determine Project Name and modify config if needed
+      if [[ "$PIN_ITEM" == "default" ]]; then
+          CURRENT_PROJECT_NAME="${PROJECT_NAME_ORIG}"
+      else
+          echo "   📌 Processing Pin: ${PIN_ITEM}"
+          update_pin_config "${PIN_ITEM}" "${CONFIG_FILE}"
+          CURRENT_PROJECT_NAME="${PROJECT_NAME_ORIG}-pin-${PIN_ITEM}"
+      fi
 
-  echo "📂 [${CHIP_FAMILY}] Copying artifacts to: ${STATIC_DEST}"
-  mkdir -p "${STATIC_DEST}"
+      # Construct Folder Name
+      BUILD_DIR_NAME="${TS_SHORT}-${INPUT_VER}-${CHIP_FAMILY}-${CURRENT_PROJECT_NAME}"
+      TARGET_DIR="${BUILDS_DIR}/${BUILD_DIR_NAME}"
 
-  # This copies target_dir/binary -> static_dest/binary
-  cp -r "${TARGET_DIR}/binary" "${STATIC_DEST}/"
-  # --------------------------------------------------
+      echo "      Compile → ${BUILD_DIR_NAME}"
+      # Suppress stdout to keep logs clean, allow stderr
+      "${SCRIPT_DIR}/compile.sh" \
+          -t "${CHIP}" \
+          --project-root "${PROJECT_ROOT}" \
+          --builds-dir "${BUILDS_DIR}" \
+          --work-dir "${WORK_DIR}" \
+          --target-dir "${TARGET_DIR}" \
+          --project-name "${CURRENT_PROJECT_NAME}" \
+          --version "${INPUT_VER}" \
+          --timestamp "${TS_ISO}" \
+          --venv "${DEFAULT_VENV}" > /dev/null
 
-  echo "📤 [${CHIP_FAMILY}] Pushing to '${BRANCH}'..."
-  "${SCRIPT_DIR}/push_to_git.sh" --project-root "${PROJECT_ROOT}" --target-dir "${TARGET_DIR}" --version "${INPUT_VER}"
+      # --- Add Release Notes ---
+      NOTES_DEST_DIR="${TARGET_DIR}/binary"
+      mkdir -p "${NOTES_DEST_DIR}"
+      cp "${NOTES_TMP}" "${NOTES_DEST_DIR}/release_notes.txt"
+
+      # --- Copy ONLY 'binary' folder to Static ---
+      STATIC_DEST="${STATIC_RELEASES_ROOT}/${INPUT_VER}/${BUILD_DIR_NAME}"
+      echo "      📂 Copying artifacts to: ${STATIC_DEST}"
+      mkdir -p "${STATIC_DEST}"
+      cp -r "${TARGET_DIR}/binary" "${STATIC_DEST}/"
+
+      echo "      📤 Pushing to '${BRANCH}'..."
+      "${SCRIPT_DIR}/push_to_git.sh" --project-root "${PROJECT_ROOT}" --target-dir "${TARGET_DIR}" --version "${INPUT_VER}"
+  done
 done
 
 # ---------- 5. Set State to NEXT DEV Version ----------
@@ -154,7 +205,7 @@ write_kv "${STATE_FILE}" PATCH "000"
 NEW_STATE="${IN_MAJOR}.${NEXT_MINOR}.0"
 echo "💾 [2/2] State set to NEXT DEV: ${NEW_STATE}"
 
-# ---------- 6. Commit NEW State to 'binaries' ----------
+# ---------- 6. Commit NEW State ----------
 commit_state_only() {
     local index_file
     index_file="$(mktemp)"
