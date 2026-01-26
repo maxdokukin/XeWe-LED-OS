@@ -178,6 +178,7 @@ void LedStrip::begin_routines_required (const ModuleConfig& cfg) {
 
 void LedStrip::begin_routines_init (const ModuleConfig& cfg) {
     int led_num_entry = 0;
+
     while (true) {
         led_num_entry = controller.serial_port.get_int("How many LEDs do you have connected?\nEnter a number: ");
         if (led_num_entry < 0) {

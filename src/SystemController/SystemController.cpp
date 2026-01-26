@@ -32,8 +32,8 @@ SystemController::SystemController()
     modules.push_back(&web_interface);
     modules.push_back(&led_strip);
 
-    interfaces.push_back(&nvs);
     interfaces.push_back(&led_strip);
+    interfaces.push_back(&nvs);
 }
 
 void SystemController::begin() {

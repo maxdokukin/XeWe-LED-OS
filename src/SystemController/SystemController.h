@@ -76,7 +76,7 @@ void SystemController::for_each_interface(
     const std::array<uint8_t, INTERFACE_COUNT>& flags, Fn&& fn) {
     for (std::size_t i = 0; i < INTERFACE_COUNT; ++i) {
 
-        if (i > 2) return;
+        if (i >= 2) return;
 
         if (flags[i] && interfaces[i]) {
             std::forward<Fn>(fn)(*interfaces[i]);
