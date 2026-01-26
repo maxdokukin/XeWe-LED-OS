@@ -18,9 +18,9 @@ xewe-os/                                           # Project root (ESP32 “xewe
 │       └── setup_build_enviroment.sh              # Installs/sets env vars/tools needed to build
 │
 ├── doc/                                           
-│   ├── ADDING_A_MODULE.md                         # How to create/register a new module in this architecture
-│   ├── BUILD_TOOLS.md                             # Notes on build tooling/scripts and expected environment
+│   ├── ADDING_A_MODULE_OR_INTERFACE.md            # How to create/register a new module in this architecture
 │   ├── CONTRIBUTING.md                            # Contribution rules (style, workflow, PR expectations)
+│   ├── MODULES_AND_INTERFACES.md                  # Contribution rules (style, workflow, PR expectations)
 │   ├── PROJECT_STRUCTURE.md                       # High-level layout and responsibilities of folders/modules
 │   └── license_header.txt                         # Standard license header text to paste into new files
 │
@@ -30,12 +30,9 @@ xewe-os/                                           # Project root (ESP32 “xewe
 │   ├── build_info.h                               # Build metadata
 │   ├── Modules/                                   # Modular feature units
 │   │   ├── Hardware/                              # Modules that touch GPIO/peripherals directly
-│   │   │   ├── Buttons/                           # Button input handling (read/debounce/events)
-│   │   │   │   ├── Buttons.cpp                    
-│   │   │   │   └── Buttons.h                      
-│   │   │   └── Pins/                              # Pin read write, PWM, and ADC
-│   │   │       ├── Pins.cpp                       
-│   │   │       └── Pins.h                         
+│   │   │   └── Buttons/                           # Button input handling (read/debounce/events)
+│   │   │       ├── Buttons.cpp                    
+│   │   │       └── Buttons.h                      
 │   │   ├── Module/                                # Base module framework
 │   │   │   ├── Module.cpp                         
 │   │   │   └── Module.h                           

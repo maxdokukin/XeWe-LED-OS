@@ -196,3 +196,8 @@ command_parser.begin(CommandParserConfig {});
 ```
 
 That's it, congrats on getting your module in.
+
+# Interfaces
+The process for adding an `Interface` is very similar.
+The only difference would be required implementation of sync functions.
+This will require you to review all other modules that call these funcitons, as you will need to update the number of sync flags for each existing interface along with `INTERFACE_COUNT` in the `SystemController.h`.
