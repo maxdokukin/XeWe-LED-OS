@@ -13,7 +13,7 @@
 
 #include "../../Interface/Interface.h"
 
-#include "ModeController/ModeController.h"
+#include "Modes/ModeController/ModeController.h"
 
 #include <FastLED.h>
 
@@ -99,7 +99,7 @@ private:
     uint8_t                     frame_delay;
 
     unique_ptr                  <AsyncTimer<uint8_t>>       frame_timer;
-    unique_ptr                  <LedModeController>         led_mode_manager;
+    unique_ptr                  <ModeController>            mode_controller;
     unique_ptr                  <Brightness>                brightness;
 
     uint32_t                    fps_counter                 =1;

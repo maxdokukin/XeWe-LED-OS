@@ -241,7 +241,7 @@ void LedStripNew::begin_routines_required(const ModuleConfig& cfg) {
 
     frame_timer = make_unique<AsyncTimer<uint8_t>>(config.led_controller_frame_delay);
     brightness = make_unique<Brightness>(config.brightness_transition_delay, 0, 0);
-    led_mode_controller = make_unique<LedModeController>(this);
+    mode_controller = make_unique<ModeController>(this);
 
     frame_timer->initiate();
 }
@@ -277,7 +277,7 @@ void LedStripNew::loop() {
     frame_timer->reset();
     frame_timer->initiate();
 
-    led_mode_controller->loop();
+    mode_controller->loop();
     fill_all();
 }
 
@@ -323,47 +323,47 @@ string LedStripNew::status(const bool verbose) const {
 // =============================================================================
 void LedStripNew::set_rgb(const array<uint8_t, 3> new_rgb) {
 
-    led_mode_controller->set_rgb(new_rgb);
+    mode_controller->set_rgb(new_rgb);
 }
 
 void LedStripNew::set_r(const uint8_t r) {
     array<uint8_t, 3> old_rgb = get_rgb();
-    led_mode_controller->set_rgb({r, old_rgb[1], old_rgb[2]});
+    mode_controller->set_rgb({r, old_rgb[1], old_rgb[2]});
 }
 
 void LedStripNew::set_g(const uint8_t g) {
     array<uint8_t, 3> old_rgb = get_rgb();
-    led_mode_controller->set_rgb({old_rgb[0], g, old_rgb[2]});
+    mode_controller->set_rgb({old_rgb[0], g, old_rgb[2]});
 }
 
 void LedStripNew::set_b(const uint8_t b) {
     array<uint8_t, 3> old_rgb = get_rgb();
-    led_mode_controller->set_rgb({old_rgb[0], old_rgb[1], b});
+    mode_controller->set_rgb({old_rgb[0], old_rgb[1], b});
 }
 
 void LedStripNew::set_hsv(const array<uint8_t, 3> new_hsv) {
-    array<uint8_t, 3> new_rgb = LedModeController::hsv_to_rgb(new_hsv[0], new_hsv[1], new_hsv[2]);
-    led_mode_controller->set_rgb(new_rgb);
+    array<uint8_t, 3> new_rgb = ModeController::hsv_to_rgb(new_hsv[0], new_hsv[1], new_hsv[2]);
+    mode_controller->set_rgb(new_rgb);
 }
 
 void LedStripNew::set_h(const uint8_t h) {
     array<uint8_t, 3> old_hsv = get_hsv();
-    led_mode_controller->set_rgb(LedModeController::hsv_to_rgb(h, old_hsv[1], old_hsv[2]));
+    mode_controller->set_rgb(ModeController::hsv_to_rgb(h, old_hsv[1], old_hsv[2]));
 }
 
 void LedStripNew::set_s(const uint8_t s) {
     array<uint8_t, 3> old_hsv = get_hsv();
-    led_mode_controller->set_rgb(LedModeController::hsv_to_rgb(old_hsv[0], s, old_hsv[2]));
+    mode_controller->set_rgb(ModeController::hsv_to_rgb(old_hsv[0], s, old_hsv[2]));
 }
 
 void LedStripNew::set_v(const uint8_t v) {
     array<uint8_t, 3> old_hsv = get_hsv();
-    led_mode_controller->set_rgb(LedModeController::hsv_to_rgb(old_hsv[0], old_hsv[1], v));
+    mode_controller->set_rgb(ModeController::hsv_to_rgb(old_hsv[0], old_hsv[1], v));
 }
 
 array<uint8_t, 3> LedStripNew::get_rgb() const {
 
-    return led_mode_controller->get_rgb();
+    return mode_controller->get_rgb();
 }
 
 uint8_t LedStripNew::get_r() const {
@@ -383,7 +383,7 @@ uint8_t LedStripNew::get_b() const {
 
 array<uint8_t, 3> LedStripNew::get_hsv() const {
     array<uint8_t, 3> rgb = get_rgb();
-    return LedModeController::rgb_to_hsv(rgb[0], rgb[1], rgb[2]);
+    return ModeController::rgb_to_hsv(rgb[0], rgb[1], rgb[2]);
 }
 
 uint8_t LedStripNew::get_h() const {
@@ -453,22 +453,22 @@ bool LedStripNew::get_state() const {
 // =============================================================================
 void LedStripNew::set_mode(const uint8_t new_mode) {
 
-    led_mode_controller->set_mode(new_mode);
+    mode_controller->set_mode(new_mode);
 }
 
 uint8_t LedStripNew::get_mode() const {
 
-    return led_mode_controller->get_mode();
+    return mode_controller->get_mode();
 }
 
 string LedStripNew::get_mode_name() const {
 
-    return led_mode_controller->get_mode_name();
+    return mode_controller->get_mode_name();
 }
 
 string LedStripNew::get_all_modes() const {
 
-    return led_mode_controller->get_all_modes();
+    return mode_controller->get_all_modes();
 }
 
 // =============================================================================
