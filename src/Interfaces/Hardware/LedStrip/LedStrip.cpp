@@ -130,6 +130,139 @@ LedStrip::LedStrip(SystemController& controller)
         DBG_PRINTLN(LedStrip, "<- LedStrip::LedStrip()");
     }
 
+
+
+void LedStrip::set_rgb_cli(std::string_view args_sv) {
+    String args(args_sv.data(), args_sv.length());
+    int i1 = args.indexOf(' ');
+    if (i1 == -1) return;
+    int i2 = args.indexOf(' ', i1 + 1);
+    if (i2 == -1) return;
+
+    uint8_t r = args.substring(0, i1).toInt();
+    uint8_t g = args.substring(i1 + 1, i2).toInt();
+    uint8_t b = args.substring(i2 + 1).toInt();
+
+    std::array<uint8_t, 3> new_rgb = {r, g, b};
+    controller.sync_color(new_rgb, {true, true, true, true, true});
+}
+
+void LedStrip::set_r_cli(std::string_view args_sv) {
+    String args(args_sv.data(), args_sv.length());
+
+    uint8_t r = args.toInt();
+    uint8_t g = get_g();
+    uint8_t b = get_b();
+
+    std::array<uint8_t, 3> new_rgb = {r, g, b};
+    controller.sync_color(new_rgb, {true, true, true, true, true});
+}
+
+void LedStrip::set_g_cli(std::string_view args_sv) {
+    String args(args_sv.data(), args_sv.length());
+
+    uint8_t r = get_r();
+    uint8_t g = args.toInt();
+    uint8_t b = get_b();
+
+    std::array<uint8_t, 3> new_rgb = {r, g, b};
+    controller.sync_color(new_rgb, {true, true, true, true, true});
+}
+
+void LedStrip::set_b_cli(std::string_view args_sv) {
+    String args(args_sv.data(), args_sv.length());
+
+    uint8_t r = get_r();
+    uint8_t g = get_g();
+    uint8_t b = args.toInt();
+
+    std::array<uint8_t, 3> new_rgb = {r, g, b};
+    controller.sync_color(new_rgb, {true, true, true, true, true});
+}
+
+void LedStrip::set_hsv_cli(std::string_view args_sv) {
+    String args(args_sv.data(), args_sv.length());
+    int i1 = args.indexOf(' ');
+    if (i1 == -1) return;
+    int i2 = args.indexOf(' ', i1 + 1);
+    if (i2 == -1) return;
+
+    uint8_t h = args.substring(0, i1).toInt();
+    uint8_t s = args.substring(i1 + 1, i2).toInt();
+    uint8_t v = args.substring(i2 + 1).toInt();
+
+    std::array<uint8_t, 3> new_rgb = LedMode::hsv_to_rgb({h, s, v});
+    controller.sync_color(new_rgb, {true, true, true, true, true});
+}
+
+void LedStrip::set_hue_cli(std::string_view args_sv) {
+    String args(args_sv.data(), args_sv.length());
+    std::array<uint8_t, 3> current_hsv = get_hsv();
+
+    uint8_t h = args.toInt();
+    uint8_t s = current_hsv[1];
+    uint8_t v = current_hsv[2];
+
+    std::array<uint8_t, 3> new_rgb = LedMode::hsv_to_rgb({h, s, v});
+    controller.sync_color(new_rgb, {true, true, true, true, true});
+}
+
+void LedStrip::set_sat_cli(std::string_view args_sv) {
+    String args(args_sv.data(), args_sv.length());
+    std::array<uint8_t, 3> current_hsv = get_hsv();
+
+    uint8_t h = current_hsv[0];
+    uint8_t s = args.toInt();
+    uint8_t v = current_hsv[2];
+
+    std::array<uint8_t, 3> new_rgb = LedMode::hsv_to_rgb({h, s, v});
+    controller.sync_color(new_rgb, {true, true, true, true, true});
+}
+
+void LedStrip::set_val_cli(std::string_view args_sv) {
+    String args(args_sv.data(), args_sv.length());
+    std::array<uint8_t, 3> current_hsv = get_hsv();
+
+    uint8_t h = current_hsv[0];
+    uint8_t s = current_hsv[1];
+    uint8_t v = args.toInt();
+
+    std::array<uint8_t, 3> new_rgb = LedMode::hsv_to_rgb({h, s, v});
+    controller.sync_color(new_rgb, {true, true, true, true, true});
+}
+
+void LedStrip::set_brightness_cli(std::string_view args_sv) {
+    String args(args_sv.data(), args_sv.length());
+    controller.sync_brightness(args.toInt(), {true, true, true, true, true});
+}
+
+void LedStrip::set_state_cli(std::string_view args_sv) {
+    String args(args_sv.data(), args_sv.length());
+    controller.sync_state(args.toInt(), {true, true, true, true, true});
+}
+
+void LedStrip::toggle_state_cli() {
+    controller.sync_state(!get_state(), {true, true, true, true, true});
+}
+
+void LedStrip::turn_on_cli() {
+    controller.sync_state(1, {true, true, true, true, true});
+}
+
+void LedStrip::turn_off_cli() {
+    controller.sync_state(0, {true, true, true, true, true});
+}
+
+void LedStrip::set_mode_cli(std::string_view args_sv) {
+    String args(args_sv.data(), args_sv.length());
+    controller.sync_mode(args.toInt(), {true, true, true, true, true});
+}
+
+void LedStrip::set_length_cli(std::string_view args_sv) {
+    String args(args_sv.data(), args_sv.length());
+    controller.sync_length(args.toInt(), {true, true, true, true, true});
+}
+
 LedStrip::~LedStrip() {
     DBG_PRINTLN(LedStrip, "-> LedStrip::~LedStrip()");
     if (led_mode_mutex != NULL) {
@@ -866,137 +999,6 @@ bool LedStrip::get_target_state() const {
     return res;
 }
 
-
-void LedStrip::set_rgb_cli(std::string_view args_sv) {
-    String args(args_sv.data(), args_sv.length());
-    int i1 = args.indexOf(' ');
-    if (i1 == -1) return;
-    int i2 = args.indexOf(' ', i1 + 1);
-    if (i2 == -1) return;
-
-    uint8_t r = args.substring(0, i1).toInt();
-    uint8_t g = args.substring(i1 + 1, i2).toInt();
-    uint8_t b = args.substring(i2 + 1).toInt();
-
-    std::array<uint8_t, 3> new_rgb = {r, g, b};
-    controller.sync_color(new_rgb, {true, true, true, true, true});
-}
-
-void LedStrip::set_r_cli(std::string_view args_sv) {
-    String args(args_sv.data(), args_sv.length());
-
-    uint8_t r = args.toInt();
-    uint8_t g = get_g();
-    uint8_t b = get_b();
-
-    std::array<uint8_t, 3> new_rgb = {r, g, b};
-    controller.sync_color(new_rgb, {true, true, true, true, true});
-}
-
-void LedStrip::set_g_cli(std::string_view args_sv) {
-    String args(args_sv.data(), args_sv.length());
-
-    uint8_t r = get_r();
-    uint8_t g = args.toInt();
-    uint8_t b = get_b();
-
-    std::array<uint8_t, 3> new_rgb = {r, g, b};
-    controller.sync_color(new_rgb, {true, true, true, true, true});
-}
-
-void LedStrip::set_b_cli(std::string_view args_sv) {
-    String args(args_sv.data(), args_sv.length());
-
-    uint8_t r = get_r();
-    uint8_t g = get_g();
-    uint8_t b = args.toInt();
-
-    std::array<uint8_t, 3> new_rgb = {r, g, b};
-    controller.sync_color(new_rgb, {true, true, true, true, true});
-}
-
-void LedStrip::set_hsv_cli(std::string_view args_sv) {
-    String args(args_sv.data(), args_sv.length());
-    int i1 = args.indexOf(' ');
-    if (i1 == -1) return;
-    int i2 = args.indexOf(' ', i1 + 1);
-    if (i2 == -1) return;
-
-    uint8_t h = args.substring(0, i1).toInt();
-    uint8_t s = args.substring(i1 + 1, i2).toInt();
-    uint8_t v = args.substring(i2 + 1).toInt();
-
-    std::array<uint8_t, 3> new_rgb = LedMode::hsv_to_rgb({h, s, v});
-    controller.sync_color(new_rgb, {true, true, true, true, true});
-}
-
-void LedStrip::set_hue_cli(std::string_view args_sv) {
-    String args(args_sv.data(), args_sv.length());
-    std::array<uint8_t, 3> current_hsv = get_hsv();
-
-    uint8_t h = args.toInt();
-    uint8_t s = current_hsv[1];
-    uint8_t v = current_hsv[2];
-
-    std::array<uint8_t, 3> new_rgb = LedMode::hsv_to_rgb({h, s, v});
-    controller.sync_color(new_rgb, {true, true, true, true, true});
-}
-
-void LedStrip::set_sat_cli(std::string_view args_sv) {
-    String args(args_sv.data(), args_sv.length());
-    std::array<uint8_t, 3> current_hsv = get_hsv();
-
-    uint8_t h = current_hsv[0];
-    uint8_t s = args.toInt();
-    uint8_t v = current_hsv[2];
-
-    std::array<uint8_t, 3> new_rgb = LedMode::hsv_to_rgb({h, s, v});
-    controller.sync_color(new_rgb, {true, true, true, true, true});
-}
-
-void LedStrip::set_val_cli(std::string_view args_sv) {
-    String args(args_sv.data(), args_sv.length());
-    std::array<uint8_t, 3> current_hsv = get_hsv();
-
-    uint8_t h = current_hsv[0];
-    uint8_t s = current_hsv[1];
-    uint8_t v = args.toInt();
-
-    std::array<uint8_t, 3> new_rgb = LedMode::hsv_to_rgb({h, s, v});
-    controller.sync_color(new_rgb, {true, true, true, true, true});
-}
-
-void LedStrip::set_brightness_cli(std::string_view args_sv) {
-    String args(args_sv.data(), args_sv.length());
-    controller.sync_brightness(args.toInt(), {true, true, true, true, true});
-}
-
-void LedStrip::set_state_cli(std::string_view args_sv) {
-    String args(args_sv.data(), args_sv.length());
-    controller.sync_state(args.toInt(), {true, true, true, true, true});
-}
-
-void LedStrip::toggle_state_cli() {
-    controller.sync_state(!get_state(), {true, true, true, true, true});
-}
-
-void LedStrip::turn_on_cli() {
-    controller.sync_state(1, {true, true, true, true, true});
-}
-
-void LedStrip::turn_off_cli() {
-    controller.sync_state(0, {true, true, true, true, true});
-}
-
-void LedStrip::set_mode_cli(std::string_view args_sv) {
-    String args(args_sv.data(), args_sv.length());
-    controller.sync_mode(args.toInt(), {true, true, true, true, true});
-}
-
-void LedStrip::set_length_cli(std::string_view args_sv) {
-    String args(args_sv.data(), args_sv.length());
-    controller.sync_length(args.toInt(), {true, true, true, true, true});
-}
 std::string LedStrip::get_all_modes_list() const {
     return R"({"0":"Solid Color","1":"Color Changing"})";
 }
