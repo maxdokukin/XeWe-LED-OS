@@ -1,26 +1,29 @@
-// LedModeController.h
 #pragma once
 
 #include <array>
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 #include <FastLED.h>
 
 using std::array;
 using std::string;
 using std::unique_ptr;
+using std::vector;
 
-class Mode;
+
+#include "Modes/Mode/Mode.h"
+#include "../AsyncTimer/AsyncTimer.h"
+
 class LedStrip;
-template <typename T> class AsyncTimer;
 
 class ModeController {
 public:
     explicit                    ModeController              (LedStrip& led_strip,
                                                              uint16_t mode_transition_delay);
 
-    CRGB*                       loop                        ();
+    CRGB* loop                        ();
 
     void                        set_rgb                     (const array<uint8_t, 3> new_rgb);
     array<uint8_t, 3>           get_rgb                     () const;
@@ -34,11 +37,12 @@ public:
     static std::array<uint8_t, 3> rgb_to_hsv                (uint8_t r, uint8_t g, uint8_t b);
 
 private:
-    using MakeFn = unique_ptr<Mode>(*)(const array<uint8_t, 3>&);
+    // UPDATE: MakeFn now accepts num_leds
+    using MakeFn = unique_ptr<Mode>(*)(uint16_t num_leds, const array<uint8_t, 3>&);
 
     struct ModeDesc {
         uint8_t                 id;
-        const char*             name;
+        const char* name;
         MakeFn                  make;
     };
 
@@ -51,8 +55,9 @@ private:
 
     unique_ptr<AsyncTimer<uint16_t>> transition_timer;
 
-    CRGB                        frame[LED_STRIP_NUM_LEDS_MAX];
+    // UPDATE: Changed from fixed array to vector
+    std::vector<CRGB>           frame;
 
-    const ModeDesc*             find_mode                   (uint8_t id) const;
+    const ModeDesc* find_mode                   (uint8_t id) const;
     void                        begin_transition            (unique_ptr<Mode> next);
 };

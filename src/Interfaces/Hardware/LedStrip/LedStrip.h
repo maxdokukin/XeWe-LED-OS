@@ -7,13 +7,13 @@
  *  Required Notice: Copyright 2025 Maxim Dokukin (https://maxdokukin.com)
  *  https://github.com/maxdokukin/xewe-led-os
  *********************************************************************************/
-// src/Interfaces/Hardware/LedStripNew/LedStripNew.h
+// src/Interfaces/Hardware/LedStrip/LedStrip.h
 
 #pragma once
 
 #include "../../Interface/Interface.h"
 
-#include "Modes/ModeController/ModeController.h"
+#include "ModeController/ModeController.h"
 
 #include <FastLED.h>
 
@@ -25,9 +25,9 @@ struct LedStripConfig : public ModuleConfig {
 };
 
 
-class LedStripNew : public Interface {
+class LedStrip : public Interface {
 public:
-    explicit                    LedStripNew                 (SystemController& controller);
+    explicit                    LedStrip                    (SystemController& controller);
 
     // interface sync
     void                        sync_color                  (const array<uint8_t,3> color)  override;

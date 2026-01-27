@@ -7,16 +7,16 @@
  *  Required Notice: Copyright 2025 Maxim Dokukin (https://maxdokukin.com)
  *  https://github.com/maxdokukin/xewe-led-os
  *********************************************************************************/
-// src/Interfaces/Hardware/LedStripNew/LedStripNew.cpp
+// src/Interfaces/Hardware/LedStrip/LedStrip.cpp
 
-#include "LedStripNew.h"
+#include "LedStrip.h"
 
 #include "../../../SystemController/SystemController.h"
 
 // =============================================================================
 // Constructor
 // =============================================================================
-LedStripNew::LedStripNew(SystemController& controller)
+LedStrip::LedStrip(SystemController& controller)
       : Interface(controller,
                /* interface_name        */  "Led",
                /* interface_description */  "Allows to control addressable LED strip",
@@ -218,20 +218,20 @@ LedStripNew::LedStripNew(SystemController& controller)
 // =============================================================================
 // Interface Sync
 // =============================================================================
-void LedStripNew::sync_color(array<uint8_t,3> color) { set_rgb(color); }
+void LedStrip::sync_color(array<uint8_t,3> color) { set_rgb(color); }
 
-void LedStripNew::sync_brightness(uint8_t brightness) { set_brightness(brightness); }
+void LedStrip::sync_brightness(uint8_t brightness) { set_brightness(brightness); }
 
-void LedStripNew::sync_state(uint8_t state) { set_state(state); }
+void LedStrip::sync_state(uint8_t state) { set_state(state); }
 
-void LedStripNew::sync_mode(uint8_t mode) { set_mode(mode); }
+void LedStrip::sync_mode(uint8_t mode) { set_mode(mode); }
 
-void LedStripNew::sync_length(uint16_t length) { set_length(length); }
+void LedStrip::sync_length(uint16_t length) { set_length(length); }
 
 // =============================================================================
 // Module Logic
 // =============================================================================
-void LedStripNew::begin_routines_required(const ModuleConfig& cfg) {
+void LedStrip::begin_routines_required(const ModuleConfig& cfg) {
     const auto& config = static_cast<const LedStripConfig&>(cfg);
     this->num_led                = config.num_led;
     this->mode_transition_delay  = config.mode_transition_delay;
@@ -246,7 +246,7 @@ void LedStripNew::begin_routines_required(const ModuleConfig& cfg) {
     frame_timer->initiate();
 }
 
-void LedStripNew::begin_routines_init(const ModuleConfig& cfg) {
+void LedStrip::begin_routines_init(const ModuleConfig& cfg) {
     this->num_led = controller.serial_port.get_int("How many LEDs do you have connected", 0, LED_STRIP_NUM_LEDS_MAX + 1);
     controller.sync_all(
         {0, 255,  0},
@@ -262,17 +262,17 @@ void LedStripNew::begin_routines_init(const ModuleConfig& cfg) {
                                    "LED setup success!");
 }
 
-void LedStripNew::begin_routines_regular(const ModuleConfig& cfg) {
+void LedStrip::begin_routines_regular(const ModuleConfig& cfg) {
 
     controller.nvs.sync_from_memory({true, false, false, false, false});
 }
 
-void LedStripNew::begin_routines_common(const ModuleConfig& cfg) {
+void LedStrip::begin_routines_common(const ModuleConfig& cfg) {
     controller.serial_port.print("Setting up LED lights");
     run_with_dots([this] { loop(); }, (float) color_transition_delay * 1.2f);
 }
 
-void LedStripNew::loop() {
+void LedStrip::loop() {
     if (frame_timer->is_not_done()) return;
     frame_timer->reset();
     frame_timer->initiate();
@@ -281,7 +281,7 @@ void LedStripNew::loop() {
     fill_all();
 }
 
-void LedStripNew::reset(const bool verbose, const bool do_restart, const bool keep_enabled) {
+void LedStrip::reset(const bool verbose, const bool do_restart, const bool keep_enabled) {
     controller.sync_all(
         {0, 255,  0},
         50,
@@ -294,7 +294,7 @@ void LedStripNew::reset(const bool verbose, const bool do_restart, const bool ke
     Module::reset(verbose, do_restart, keep_enabled);
 }
 
-string LedStripNew::status(const bool verbose) const {
+string LedStrip::status(const bool verbose) const {
     std::stringstream status_stream;
     status_stream << "Hardware Setting:\n"
                   << "    Pin:          GPIO" << static_cast<int>(PIN_LED_STRIP) << "\n"
@@ -321,82 +321,82 @@ string LedStripNew::status(const bool verbose) const {
 // =============================================================================
 // Custom Methods: Color
 // =============================================================================
-void LedStripNew::set_rgb(const array<uint8_t, 3> new_rgb) {
+void LedStrip::set_rgb(const array<uint8_t, 3> new_rgb) {
 
     mode_controller->set_rgb(new_rgb);
 }
 
-void LedStripNew::set_r(const uint8_t r) {
+void LedStrip::set_r(const uint8_t r) {
     array<uint8_t, 3> old_rgb = get_rgb();
     mode_controller->set_rgb({r, old_rgb[1], old_rgb[2]});
 }
 
-void LedStripNew::set_g(const uint8_t g) {
+void LedStrip::set_g(const uint8_t g) {
     array<uint8_t, 3> old_rgb = get_rgb();
     mode_controller->set_rgb({old_rgb[0], g, old_rgb[2]});
 }
 
-void LedStripNew::set_b(const uint8_t b) {
+void LedStrip::set_b(const uint8_t b) {
     array<uint8_t, 3> old_rgb = get_rgb();
     mode_controller->set_rgb({old_rgb[0], old_rgb[1], b});
 }
 
-void LedStripNew::set_hsv(const array<uint8_t, 3> new_hsv) {
+void LedStrip::set_hsv(const array<uint8_t, 3> new_hsv) {
     array<uint8_t, 3> new_rgb = ModeController::hsv_to_rgb(new_hsv[0], new_hsv[1], new_hsv[2]);
     mode_controller->set_rgb(new_rgb);
 }
 
-void LedStripNew::set_h(const uint8_t h) {
+void LedStrip::set_h(const uint8_t h) {
     array<uint8_t, 3> old_hsv = get_hsv();
     mode_controller->set_rgb(ModeController::hsv_to_rgb(h, old_hsv[1], old_hsv[2]));
 }
 
-void LedStripNew::set_s(const uint8_t s) {
+void LedStrip::set_s(const uint8_t s) {
     array<uint8_t, 3> old_hsv = get_hsv();
     mode_controller->set_rgb(ModeController::hsv_to_rgb(old_hsv[0], s, old_hsv[2]));
 }
 
-void LedStripNew::set_v(const uint8_t v) {
+void LedStrip::set_v(const uint8_t v) {
     array<uint8_t, 3> old_hsv = get_hsv();
     mode_controller->set_rgb(ModeController::hsv_to_rgb(old_hsv[0], old_hsv[1], v));
 }
 
-array<uint8_t, 3> LedStripNew::get_rgb() const {
+array<uint8_t, 3> LedStrip::get_rgb() const {
 
     return mode_controller->get_rgb();
 }
 
-uint8_t LedStripNew::get_r() const {
+uint8_t LedStrip::get_r() const {
 
     return get_rgb()[0];
 }
 
-uint8_t LedStripNew::get_g() const {
+uint8_t LedStrip::get_g() const {
 
     return get_rgb()[1];
 }
 
-uint8_t LedStripNew::get_b() const {
+uint8_t LedStrip::get_b() const {
 
     return get_rgb()[2];
 }
 
-array<uint8_t, 3> LedStripNew::get_hsv() const {
+array<uint8_t, 3> LedStrip::get_hsv() const {
     array<uint8_t, 3> rgb = get_rgb();
     return ModeController::rgb_to_hsv(rgb[0], rgb[1], rgb[2]);
 }
 
-uint8_t LedStripNew::get_h() const {
+uint8_t LedStrip::get_h() const {
 
     return get_hsv()[0];
 }
 
-uint8_t LedStripNew::get_s() const {
+uint8_t LedStrip::get_s() const {
 
     return get_hsv()[1];
 }
 
-uint8_t LedStripNew::get_v() const {
+uint8_t LedStrip::get_v() const {
 
     return get_hsv()[2];
 }
@@ -404,12 +404,12 @@ uint8_t LedStripNew::get_v() const {
 // =============================================================================
 // Custom Methods: Brightness
 // =============================================================================
-void LedStripNew::set_brightness(const uint8_t new_brightness) {
+void LedStrip::set_brightness(const uint8_t new_brightness) {
 
     brightness->set_brightness(new_brightness);
 }
 
-uint8_t LedStripNew::get_brightness() const {
+uint8_t LedStrip::get_brightness() const {
 
     return brightness->get_last_brightness();
 }
@@ -417,7 +417,7 @@ uint8_t LedStripNew::get_brightness() const {
 // =============================================================================
 // Custom Methods: State
 // =============================================================================
-void LedStripNew::set_state(const uint8_t state) {
+void LedStrip::set_state(const uint8_t state) {
     if (state_val) {
         turn_on();
     } else {
@@ -425,7 +425,7 @@ void LedStripNew::set_state(const uint8_t state) {
     }
 }
 
-void LedStripNew::toggle_state() {
+void LedStrip::toggle_state() {
     if(get_state()) {
         turn_off();
     } else {
@@ -433,17 +433,17 @@ void LedStripNew::toggle_state() {
     }
 }
 
-void LedStripNew::turn_on() {
+void LedStrip::turn_on() {
 
     brightness->turn_on();
 }
 
-void LedStripNew::turn_off() {
+void LedStrip::turn_off() {
 
     brightness->turn_off();
 }
 
-bool LedStripNew::get_state() const {
+bool LedStrip::get_state() const {
 
     return brightness->get_state();
 }
@@ -451,22 +451,22 @@ bool LedStripNew::get_state() const {
 // =============================================================================
 // Custom Methods: Mode
 // =============================================================================
-void LedStripNew::set_mode(const uint8_t new_mode) {
+void LedStrip::set_mode(const uint8_t new_mode) {
 
     mode_controller->set_mode(new_mode);
 }
 
-uint8_t LedStripNew::get_mode() const {
+uint8_t LedStrip::get_mode() const {
 
     return mode_controller->get_mode();
 }
 
-string LedStripNew::get_mode_name() const {
+string LedStrip::get_mode_name() const {
 
     return mode_controller->get_mode_name();
 }
 
-string LedStripNew::get_all_modes() const {
+string LedStrip::get_all_modes() const {
 
     return mode_controller->get_all_modes();
 }
@@ -474,7 +474,7 @@ string LedStripNew::get_all_modes() const {
 // =============================================================================
 // Custom Methods: Length
 // =============================================================================
-void LedStripNew::set_length(const uint16_t length) {
+void LedStrip::set_length(const uint16_t length) {
     if (new_length > LED_STRIP_NUM_LEDS_MAX) {
         controller.serial_port.print("That's too many. Max supported: " + to_string(LED_STRIP_NUM_LEDS_MAX) + " LEDs");
         return;
@@ -485,7 +485,7 @@ void LedStripNew::set_length(const uint16_t length) {
     num_led = new_length;
 }
 
-uint16_t LedStripNew::get_length() const {
+uint16_t LedStrip::get_length() const {
 
     return num_led;
 }

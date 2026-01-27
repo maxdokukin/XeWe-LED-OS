@@ -1,21 +1,26 @@
-// LedModeController.cpp
 #include "LedModeController.h"
-#include "Mode.h"
-#include "AsyncTimer.h"
+#include "../LedStrip.h"
 
-unique_ptr<Mode> make_mode_solid(const array<uint8_t, 3>& rgb);
-unique_ptr<Mode> make_mode_fade(const array<uint8_t, 3>& rgb);
-unique_ptr<Mode> make_mode_rainbow(const array<uint8_t, 3>& rgb);
+unique_ptr<Mode> make_mode_solid(uint16_t num_leds, const array<uint8_t, 3>& rgb);
+unique_ptr<Mode> make_mode_fade(uint16_t num_leds, const array<uint8_t, 3>& rgb);
+unique_ptr<Mode> make_mode_rainbow(uint16_t num_leds, const array<uint8_t, 3>& rgb);
 
 ModeController::ModeController(LedStrip& led_strip, uint16_t mode_transition_delay)
 : led_strip(led_strip) {
+    
+    // UPDATE: Resize the controller's main frame buffer to match strip
+    frame.resize(led_strip.get_length());
+
     transition_timer = std::make_unique<AsyncTimer<uint16_t>>(mode_transition_delay);
+    
     mode_registry = {{
         {0, "Solid",   &make_mode_solid},
         {1, "Fade",    &make_mode_fade},
         {2, "Rainbow", &make_mode_rainbow}
     }};
-    current_mode = mode_registry[0].make({0, 0, 0});
+
+    // UPDATE: Pass length to factory
+    current_mode = mode_registry[0].make(led_strip.get_length(), {0, 0, 0});
 }
 
 const ModeController::ModeDesc* ModeController::find_mode(uint8_t id) const {
@@ -39,7 +44,9 @@ CRGB* ModeController::loop() {
 
         uint8_t amount = (uint8_t)(transition_timer->get_progress() * 255.0f + 0.5f);
 
-        for (size_t i = 0; i < led_strip.get_length(); ++i)
+        // UPDATE: Use vector size or led_strip.get_length()
+        size_t len = frame.size();
+        for (size_t i = 0; i < len; ++i)
             frame[i] = blend(a[i], b[i], amount);
 
         if (transition_timer->is_done()) {
@@ -48,17 +55,22 @@ CRGB* ModeController::loop() {
         }
     } else {
         const CRGB* out = current_mode->loop();
-        for (size_t i = 0; i < led_strip.get_length(); ++i)
+        // UPDATE: Use vector size
+        size_t len = frame.size();
+        for (size_t i = 0; i < len; ++i)
             frame[i] = out[i];
     }
 
-    return frame;
+    // Return pointer to vector data
+    return frame.data();
 }
 
 void ModeController::set_rgb(const array<uint8_t, 3> new_rgb) {
     const ModeDesc* d = find_mode(current_mode->get_id());
     if (!d) return;
-    begin_transition(d->make(new_rgb));
+    
+    // UPDATE: Pass length to factory
+    begin_transition(d->make(led_strip.get_length(), new_rgb));
 }
 
 array<uint8_t, 3> ModeController::get_rgb() const {
@@ -68,7 +80,9 @@ array<uint8_t, 3> ModeController::get_rgb() const {
 void ModeController::set_mode(const uint8_t new_mode_id) {
     const ModeDesc* d = find_mode(new_mode_id);
     if (!d) return;
-    begin_transition(d->make(current_mode->get_rgb()));
+
+    // UPDATE: Pass length to factory
+    begin_transition(d->make(led_strip.get_length(), current_mode->get_rgb()));
 }
 
 uint8_t ModeController::get_mode_id() const {
