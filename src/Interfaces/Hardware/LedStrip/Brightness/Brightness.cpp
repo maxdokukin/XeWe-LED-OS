@@ -185,7 +185,7 @@ void Brightness::turn_off() {
 }
 
 uint8_t Brightness::get_dimmed_color(uint8_t color) const {
-    DBG_PRINTF(Brightness, "-> Brightness::get_dimmed_color(color: %u)\n", color);
+//    DBG_PRINTF(Brightness, "-> Brightness::get_dimmed_color(color: %u)\n", color);
     // WARNING: This method calls get_current_value().
     // If internal_mutex is not recursive, this will cause a deadlock if get_current_value also locks.
     uint8_t result = 0; // Default value
@@ -201,25 +201,25 @@ uint8_t Brightness::get_dimmed_color(uint8_t color) const {
 
         xSemaphoreGive(const_cast<Brightness*>(this)->internal_mutex);
     } else {
-        DBG_PRINTLN(Brightness, "ERROR: Could not take internal_mutex in get_dimmed_color (part 1)");
-        DBG_PRINTF(Brightness, "<- Brightness::get_dimmed_color() returns: %u (mutex error)\n", 0);
+//        DBG_PRINTLN(Brightness, "ERROR: Could not take internal_mutex in get_dimmed_color (part 1)");
+//        DBG_PRINTF(Brightness, "<- Brightness::get_dimmed_color() returns: %u (mutex error)\n", 0);
         return 0; // Early exit if mutex cannot be taken
     }
 
     if (!local_state && timer_is_done) {
-        DBG_PRINTF(Brightness, "<- Brightness::get_dimmed_color() returns: 0 (off and done)\n");
+//        DBG_PRINTF(Brightness, "<- Brightness::get_dimmed_color() returns: 0 (off and done)\n");
         return 0;
     }
 
     // current_timer_val was already fetched under lock
     result = static_cast<uint8_t>((static_cast<uint32_t>(color) * current_timer_val) / 255); // Use uint32_t for intermediate multiplication
 
-    DBG_PRINTF(Brightness, "<- Brightness::get_dimmed_color() returns: %u\n", result);
+//    DBG_PRINTF(Brightness, "<- Brightness::get_dimmed_color() returns: %u\n", result);
     return result;
 }
 
 std::array<uint8_t,3> Brightness::get_dimmed_color (std::array<uint8_t,3> color_rgb) const {
-    DBG_PRINTF(Brightness, "-> Brightness::get_dimmed_color(color: %u %u %u)\n", color_rgb[0], color_rgb[1], color_rgb[2]);
+//    DBG_PRINTF(Brightness, "-> Brightness::get_dimmed_color(color: %u %u %u)\n", color_rgb[0], color_rgb[1], color_rgb[2]);
     // WARNING: This method calls get_current_value().
     // If internal_mutex is not recursive, this will cause a deadlock if get_current_value also locks.
     std::array<uint8_t,3> result = {0, 0, 0}; // Default value
@@ -235,13 +235,13 @@ std::array<uint8_t,3> Brightness::get_dimmed_color (std::array<uint8_t,3> color_
 
         xSemaphoreGive(const_cast<Brightness*>(this)->internal_mutex);
     } else {
-        DBG_PRINTLN(Brightness, "ERROR: Could not take internal_mutex in get_dimmed_color (part 1)");
-        DBG_PRINTF(Brightness, "<- Brightness::get_dimmed_color() returns: %u (mutex error)\n", 0);
+//        DBG_PRINTLN(Brightness, "ERROR: Could not take internal_mutex in get_dimmed_color (part 1)");
+//        DBG_PRINTF(Brightness, "<- Brightness::get_dimmed_color() returns: %u (mutex error)\n", 0);
         return result; // Early exit if mutex cannot be taken
     }
 
     if (!local_state && timer_is_done) {
-        DBG_PRINTF(Brightness, "<- Brightness::get_dimmed_color() returns: 0 (off and done)\n");
+//        DBG_PRINTF(Brightness, "<- Brightness::get_dimmed_color() returns: 0 (off and done)\n");
         return result;
     }
 
@@ -250,7 +250,7 @@ std::array<uint8_t,3> Brightness::get_dimmed_color (std::array<uint8_t,3> color_
               static_cast<uint8_t>((static_cast<uint32_t>(color_rgb[1]) * current_timer_val) / 255),
               static_cast<uint8_t>((static_cast<uint32_t>(color_rgb[2]) * current_timer_val) / 255)};
 
-    DBG_PRINTF(Brightness, "<- Brightness::get_dimmed_color() returns: %u %u %u\n", result[0], result[1], result[2]);
+//    DBG_PRINTF(Brightness, "<- Brightness::get_dimmed_color() returns: %u %u %u\n", result[0], result[1], result[2]);
     return result;
 }
 
