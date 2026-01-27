@@ -143,6 +143,7 @@ string ModeController::get_all_modes() const {
         s += "\"}";
     }
     s += "]";
+    DBG_PRINTLN(ModeController, s.c_str());
     DBG_PRINTLN(ModeController, "<- get_all_modes()");
     return s;
 }

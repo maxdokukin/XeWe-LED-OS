@@ -459,18 +459,17 @@ const char WebInterface::INDEX_HTML[] PROGMEM = R"rawliteral(
     try {
       const res = await fetch(`/modes`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const modes = await res.json(); // {"MODE_ID":"MODE_NAME", ...}
+      const modes = await res.json(); // Now handling: [{"id":0,"name":"Solid"}, ...]
       // Clear current options and populate
       elements.mode.innerHTML = "";
-      for (const [id, name] of Object.entries(modes)) {
+      modes.forEach(modeObj => {
         const opt = document.createElement('option');
-        opt.value = id;              // keep as string; server .toInt() handles it
-        opt.textContent = name || `Mode ${id}`;
+        opt.value = modeObj.id;
+        opt.textContent = modeObj.name || `Mode ${modeObj.id}`;
         elements.mode.appendChild(opt);
-      }
+      });
     } catch (e) {
       console.error("Failed to load modes:", e);
-      // keep whatever was there; UI still works
     }
   }
 
