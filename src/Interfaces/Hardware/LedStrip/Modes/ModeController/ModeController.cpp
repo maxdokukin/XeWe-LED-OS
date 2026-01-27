@@ -7,14 +7,14 @@ unique_ptr<Mode> make_mode_solid(const array<uint8_t, 3>& rgb);
 unique_ptr<Mode> make_mode_fade(const array<uint8_t, 3>& rgb);
 unique_ptr<Mode> make_mode_rainbow(const array<uint8_t, 3>& rgb);
 
-ModeController::ModeController(uint16_t mode_transition_delay) {
+ModeController::ModeController(LedStrip& led_strip, uint16_t mode_transition_delay)
+: led_strip(led_strip) {
     transition_timer = std::make_unique<AsyncTimer<uint16_t>>(mode_transition_delay);
     mode_registry = {{
         {0, "Solid",   &make_mode_solid},
         {1, "Fade",    &make_mode_fade},
         {2, "Rainbow", &make_mode_rainbow}
     }};
-    for (auto& px : frame) px = CRGB::Black;
     current_mode = mode_registry[0].make({0, 0, 0});
 }
 
@@ -36,21 +36,23 @@ CRGB* ModeController::loop() {
     if (transition_timer->is_active()) {
         const CRGB* a = old_mode->loop();
         const CRGB* b = current_mode->loop();
-        //declare frame buffer here
 
         uint8_t amount = (uint8_t)(transition_timer->get_progress() * 255.0f + 0.5f);
 
-        for (size_t i = 0; i < led_strip->get_length(); ++i)
+        for (size_t i = 0; i < led_strip.get_length(); ++i)
             frame[i] = blend(a[i], b[i], amount);
 
         if (transition_timer->is_done()) {
             transition_timer->reset();
             old_mode.reset();
         }
-
-        return frame;
+    } else {
+        const CRGB* out = current_mode->loop();
+        for (size_t i = 0; i < led_strip.get_length(); ++i)
+            frame[i] = out[i];
     }
-    return current_mode->loop();
+
+    return frame;
 }
 
 void ModeController::set_rgb(const array<uint8_t, 3> new_rgb) {

@@ -12,11 +12,13 @@ using std::string;
 using std::unique_ptr;
 
 class Mode;
+class LedStrip;
 template <typename T> class AsyncTimer;
 
 class ModeController {
 public:
-    explicit                    ModeController              (uint16_t mode_transition_delay);
+    explicit                    ModeController              (LedStrip& led_strip,
+                                                             uint16_t mode_transition_delay);
 
     CRGB*                       loop                        ();
 
@@ -40,12 +42,16 @@ private:
         MakeFn                  make;
     };
 
+    LedStrip&                   led_strip;
+
     std::array<ModeDesc, 3>     mode_registry;
 
     unique_ptr<Mode>            current_mode;
     unique_ptr<Mode>            old_mode;
 
     unique_ptr<AsyncTimer<uint16_t>> transition_timer;
+
+    CRGB                        frame[LED_STRIP_NUM_LEDS_MAX];
 
     const ModeDesc*             find_mode                   (uint8_t id) const;
     void                        begin_transition            (unique_ptr<Mode> next);
