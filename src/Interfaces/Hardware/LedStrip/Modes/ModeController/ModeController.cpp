@@ -2,9 +2,9 @@
 #include "Mode.h"
 #include "AsyncTimer.h"
 
-unique_ptr<Mode> make_mode_solid();
-unique_ptr<Mode> make_mode_fade();
-unique_ptr<Mode> make_mode_rainbow();
+unique_ptr<Mode> make_mode_solid(const array<uint8_t, 3>& rgb);
+unique_ptr<Mode> make_mode_fade(const array<uint8_t, 3>& rgb);
+unique_ptr<Mode> make_mode_rainbow(const array<uint8_t, 3>& rgb);
 
 ModeController::ModeController(uint16_t mode_transition_delay) {
     transition_timer = std::make_unique<AsyncTimer<uint16_t>>(mode_transition_delay);
@@ -13,7 +13,7 @@ ModeController::ModeController(uint16_t mode_transition_delay) {
         {1, "Fade",    &make_mode_fade},
         {2, "Rainbow", &make_mode_rainbow}
     }};
-    current_mode = mode_registry[0].make();
+    current_mode = mode_registry[0].make({0, 0, 0});
 }
 
 const ModeController::ModeDesc* ModeController::find_mode(uint8_t id) const {
@@ -24,7 +24,7 @@ const ModeController::ModeDesc* ModeController::find_mode(uint8_t id) const {
 }
 
 void ModeController::begin_transition(unique_ptr<Mode> next) {
-    if (transition_timer->is_active() && new_mode)
+    if (transition_timer->is_active())
         current_mode = std::move(new_mode);
 
     new_mode = std::move(next);
@@ -34,59 +34,46 @@ void ModeController::begin_transition(unique_ptr<Mode> next) {
 
 CRGB* ModeController::loop() {
     if (transition_timer->is_active()) {
-        const CRGB* a = current_mode->loop();
-        const CRGB* b = new_mode->loop();
+        CRGB frame[led_strip->get_length()];
+        const CRGB* a = previous_mode->loop();
+        const CRGB* b = current_mode->loop();
 
-        float p = transition_timer->get_progress();
-        if (p < 0.0f) p = 0.0f;
-        if (p > 1.0f) p = 1.0f;
+        uint8_t amount = (uint8_t)(transition_timer->get_progress() * 255.0f + 0.5f);
 
-        uint8_t amount = (uint8_t)(p * 255.0f + 0.5f);
-
-        for (size_t i = 0; i < LED_STRIP_NUM_LEDS_MAX; ++i)
+        for (size_t i = 0; i < led_strip->get_length(); ++i)
             frame[i] = blend(a[i], b[i], amount);
 
-        if (transition_timer->is_done()) {
-            current_mode = std::move(new_mode);
-            new_mode.reset();
-        }
+        if (transition_timer->is_done())
+            transition_timer->reset();
 
         return frame;
     }
 
-    const CRGB* out = current_mode->loop();
-    for (size_t i = 0; i < LED_STRIP_NUM_LEDS_MAX; ++i)
-        frame[i] = out[i];
-    return frame;
+    return current_mode->loop();
 }
 
 void ModeController::set_rgb(const array<uint8_t, 3> new_rgb) {
     const ModeDesc* d = find_mode(current_mode->get_id());
-    unique_ptr<Mode> next = d->make();
-    next->set_rgb(new_rgb);
-    begin_transition(std::move(next));
+    if (!d) return;
+    begin_transition(d->make(new_rgb));
 }
 
 array<uint8_t, 3> ModeController::get_rgb() const {
-    return transition_timer->is_active() ? new_mode->get_rgb() : current_mode->get_rgb();
+    return current_mode->get_rgb();
 }
 
 void ModeController::set_mode(const uint8_t new_mode_id) {
     const ModeDesc* d = find_mode(new_mode_id);
-    if (!d) {
-        return;
-    }
-    unique_ptr<Mode> next = d->make();
-    next->set_rgb(get_rgb());
-    begin_transition(std::move(next));
+    if (!d) return;
+    begin_transition(d->make(current_mode->get_rgb()));
 }
 
-uint8_t ModeController::get_mode() const {
-    return transition_timer->is_active() ? new_mode->get_id() : current_mode->get_id();
+uint8_t ModeController::get_mode_id() const {
+    return current_mode->get_id();
 }
 
 string ModeController::get_mode_name() const {
-    return transition_timer->is_active() ? new_mode->get_name() : current_mode->get_name();
+    return current_mode->get_name();
 }
 
 string ModeController::get_all_modes() const {

@@ -31,7 +31,7 @@ public:
     static std::array<uint8_t, 3> rgb_to_hsv                (uint8_t r, uint8_t g, uint8_t b);
 
 private:
-    using MakeFn = unique_ptr<Mode>(*)();
+    using MakeFn = unique_ptr<Mode>(*)(const array<uint8_t, 3>&);
 
     struct ModeDesc {
         uint8_t                 id;
@@ -42,7 +42,7 @@ private:
     std::array<ModeDesc, 3>     mode_registry;
 
     unique_ptr<Mode>            current_mode;
-    unique_ptr<Mode>            new_mode;
+    unique_ptr<Mode>            old_mode;
 
     unique_ptr<AsyncTimer<uint16_t>> transition_timer;
 
