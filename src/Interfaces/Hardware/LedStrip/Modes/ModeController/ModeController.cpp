@@ -1,4 +1,3 @@
-// LedModeController.cpp
 #include "LedModeController.h"
 #include "Mode.h"
 #include "AsyncTimer.h"
@@ -9,88 +8,85 @@ unique_ptr<Mode> make_mode_rainbow();
 
 ModeController::ModeController(uint16_t mode_transition_delay) {
     transition_timer = std::make_unique<AsyncTimer<uint16_t>>(mode_transition_delay);
-    transition_timer->activate();
-    
-    register_modes();
-    begin_transition(mode_registry[0].make(), mode_registry[0].id);    
-}
-
-void ModeController::register_modes() {
     mode_registry = {{
         {0, "Solid",   &make_mode_solid},
-        {1, "Fade", &make_mode_fade},
-        {2, "Rainbow",   &make_mode_rainbow}
+        {1, "Fade",    &make_mode_fade},
+        {2, "Rainbow", &make_mode_rainbow}
     }};
+    current_mode = mode_registry[0].make();
 }
 
 const ModeController::ModeDesc* ModeController::find_mode(uint8_t id) const {
     for (const auto& m : mode_registry)
         if (m.id == id)
             return &m;
-
     return nullptr;
 }
 
-void ModeController::begin_transition(unique_ptr<Mode> next, uint8_t next_id) {
-    old_mode = std::move(current_mode);
-    new_mode = std::move(next);
+void ModeController::begin_transition(unique_ptr<Mode> next) {
+    if (transition_timer->is_active() && new_mode)
+        current_mode = std::move(new_mode);
 
+    new_mode = std::move(next);
     transition_timer->reset();
-    transition_timer->activate();
+    transition_timer->initiate();
 }
 
 CRGB* ModeController::loop() {
     if (transition_timer->is_active()) {
-        const CRGB* a = old_mode->loop();
+        const CRGB* a = current_mode->loop();
         const CRGB* b = new_mode->loop();
 
-        uint8_t amount = (uint8_t)(transition_timer->get_progress() * 255.0f + 0.5f);
+        float p = transition_timer->get_progress();
+        if (p < 0.0f) p = 0.0f;
+        if (p > 1.0f) p = 1.0f;
 
-        for (size_t i = 0; i < led_strip->get_length(); ++i)
-            frame[i] = blend(a[i], b[i], amt);
+        uint8_t amount = (uint8_t)(p * 255.0f + 0.5f);
+
+        for (size_t i = 0; i < LED_STRIP_NUM_LEDS_MAX; ++i)
+            frame[i] = blend(a[i], b[i], amount);
 
         if (transition_timer->is_done()) {
             current_mode = std::move(new_mode);
-            new_mode = null;
-            old_mode = null;
+            new_mode.reset();
         }
+
         return frame;
     }
 
-    return current_mode->loop();
+    const CRGB* out = current_mode->loop();
+    for (size_t i = 0; i < LED_STRIP_NUM_LEDS_MAX; ++i)
+        frame[i] = out[i];
+    return frame;
 }
 
 void ModeController::set_rgb(const array<uint8_t, 3> new_rgb) {
     const ModeDesc* d = find_mode(current_mode->get_id());
-
-    old_mode = std::move(current_mode);
-    current_mode = std::move(d->make(new_rgb));
-
-    transition_timer->reset();
-    transition_timer->initiate();
+    unique_ptr<Mode> next = d->make();
+    next->set_rgb(new_rgb);
+    begin_transition(std::move(next));
 }
 
 array<uint8_t, 3> ModeController::get_rgb() const {
-    return current_mode->get_rgb();
+    return transition_timer->is_active() ? new_mode->get_rgb() : current_mode->get_rgb();
 }
 
-void ModeController::set_mode(const uint8_t new_mode) {
-    const ModeDesc* d = find_mode(new_mode);
-
-    old_mode = std::move(current_mode);
-    current_mode = std::move(d->make(old_mode->get_rgb()));
-
-    transition_timer->reset();
-    transition_timer->initiate();
+void ModeController::set_mode(const uint8_t new_mode_id) {
+    const ModeDesc* d = find_mode(new_mode_id);
+    if (!d) {
+        return;
+    }
+    unique_ptr<Mode> next = d->make();
+    next->set_rgb(get_rgb());
+    begin_transition(std::move(next));
 }
 
 uint8_t ModeController::get_mode() const {
-
-    return current_mode->get_id();
+    return transition_timer->is_active() ? new_mode->get_id() : current_mode->get_id();
 }
 
 string ModeController::get_mode_name() const {
-    return current_mode->get_name();
+    return transition_timer->is_active() ? new_mode->get_name() : current_mode->get_name();
 }
 
 string ModeController::get_all_modes() const {

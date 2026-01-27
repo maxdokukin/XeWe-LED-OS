@@ -17,7 +17,7 @@ class ModeController {
 public:
     explicit                    ModeController              (uint16_t mode_transition_delay);
 
-    void                        loop                        ();
+    CRGB*                       loop                        ();
 
     void                        set_rgb                     (const array<uint8_t, 3> new_rgb);
     array<uint8_t, 3>           get_rgb                     () const;
@@ -39,12 +39,15 @@ private:
         MakeFn                  make;
     };
 
-    static constexpr size_t     MODE_COUNT = 3;
-    <ModeDesc, MODE_COUNT>      mode_registry;
+    std::array<ModeDesc, 3>     mode_registry;
 
-    void                        register_modes              ();
+    unique_ptr<Mode>            current_mode;
+    unique_ptr<Mode>            new_mode;
+
+    unique_ptr<AsyncTimer<uint16_t>> transition_timer;
+
+    CRGB                        frame[LED_STRIP_NUM_LEDS_MAX];
+
     const ModeDesc*             find_mode                   (uint8_t id) const;
-
-    unique_ptr                  <Mode>                      current_mode;
-    unique_ptr                  <AsyncTimer<uint16_t>>      transition_timer;
+    void                        begin_transition            (unique_ptr<Mode> next);
 };
