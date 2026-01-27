@@ -494,13 +494,9 @@ uint16_t LedStrip::get_length() const {
 
 // Helper: Sets a single pixel with brightness correction
 void LedStrip::set_pixel(uint16_t i, std::array<uint8_t, 3> color_rgb) {
-    if (leds && i < num_led) {
-        if (brightness) {
-            std::array<uint8_t, 3> dimmed_color = brightness->get_dimmed_color(color_rgb);
-            leds[i] = CRGB(dimmed_color[0], dimmed_color[1], dimmed_color[2]);
-        } else {
-            leds[i] = CRGB(color_rgb[0], color_rgb[1], color_rgb[2]);
-        }
+    if (i < num_led) {
+        std::array<uint8_t, 3> dimmed_color = brightness->get_dimmed_color(color_rgb);
+        leds[i] = CRGB(dimmed_color[0], dimmed_color[1], dimmed_color[2]);
     }
 }
 
