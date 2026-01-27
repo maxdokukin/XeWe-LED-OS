@@ -1,4 +1,4 @@
-#include "LedModeController.h"
+#include "ModeController.h"
 #include "../LedStrip.h"
 
 unique_ptr<Mode> make_mode_solid(uint16_t num_leds, const array<uint8_t, 3>& rgb);
@@ -107,13 +107,13 @@ string ModeController::get_all_modes() const {
     return s;
 }
 
-std::array<uint8_t, 3> ModeController::hsv_to_rgb(uint8_t h, uint8_t s, uint8_t v) {
+std::array<uint8_t, 3> ModeController::hsv_to_rgb(const std::array<uint8_t, 3> hsv) {
     CRGB rgb;
-    hsv2rgb_rainbow(CHSV(h, s, v), rgb);
+    hsv2rgb_rainbow(CHSV(hsv[0], hsv[1], hsv[2]), rgb);
     return {rgb.r, rgb.g, rgb.b};
 }
 
-std::array<uint8_t, 3> ModeController::rgb_to_hsv(uint8_t r, uint8_t g, uint8_t b) {
-    CHSV hsv = rgb2hsv_approximate(CRGB(r, g, b));
+std::array<uint8_t, 3> ModeController::rgb_to_hsv(const std::array<uint8_t, 3> rgb) {
+    CHSV hsv = rgb2hsv_approximate(CRGB(rgb[0], rgb[1], rgb[2]));
     return {hsv.h, hsv.s, hsv.v};
 }

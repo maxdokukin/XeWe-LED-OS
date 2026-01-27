@@ -1,10 +1,10 @@
-#include "ModeSolid.h"
+#include "Solid.h"
 
-ModeSolid::ModeSolid(uint16_t num_leds, const std::array<uint8_t, 3>& rgb)
+Solid::Solid(uint16_t num_leds, const std::array<uint8_t, 3>& rgb)
     : Mode(num_leds, 0, "Solid", rgb)
 {}
 
-const CRGB* ModeSolid::loop() {
+const CRGB* Solid::loop() {
     // 1. Create a FastLED CRGB color from the stored array
     CRGB color = CRGB(_rgb[0], _rgb[1], _rgb[2]);
 
@@ -18,5 +18,5 @@ const CRGB* ModeSolid::loop() {
 
 // Factory Implementation
 std::unique_ptr<Mode> make_mode_solid(uint16_t num_leds, const std::array<uint8_t, 3>& rgb) {
-    return std::make_unique<ModeSolid>(num_leds, rgb);
+    return std::make_unique<Solid>(num_leds, rgb);
 }

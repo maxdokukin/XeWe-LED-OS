@@ -13,8 +13,12 @@ using std::unique_ptr;
 using std::vector;
 
 
-#include "Modes/Mode/Mode.h"
 #include "../AsyncTimer/AsyncTimer.h"
+
+#include "Modes/Mode/Mode.h"
+#include "Modes/Solid/Solid.h"
+#include "Modes/Fade/Fade.h"
+#include "Modes/Rainbow/Rainbow.h"
 
 class LedStrip;
 
@@ -23,7 +27,7 @@ public:
     explicit                    ModeController              (LedStrip& led_strip,
                                                              uint16_t mode_transition_delay);
 
-    CRGB* loop                        ();
+    CRGB* loop                  ();
 
     void                        set_rgb                     (const array<uint8_t, 3> new_rgb);
     array<uint8_t, 3>           get_rgb                     () const;
@@ -33,8 +37,8 @@ public:
     string                      get_mode_name               () const;
     string                      get_all_modes               () const;
 
-    static std::array<uint8_t, 3> hsv_to_rgb                (uint8_t h, uint8_t s, uint8_t v);
-    static std::array<uint8_t, 3> rgb_to_hsv                (uint8_t r, uint8_t g, uint8_t b);
+    static std::array<uint8_t, 3> hsv_to_rgb                (const std::array<uint8_t, 3> hsv);
+    static std::array<uint8_t, 3> rgb_to_hsv                (const std::array<uint8_t, 3> rgb);
 
 private:
     // UPDATE: MakeFn now accepts num_leds

@@ -13,6 +13,9 @@
 
 #include "../../Interface/Interface.h"
 
+
+#include "AsyncTimer/AsyncTimer.h"
+#include "Brightness/Brightness.h"
 #include "ModeController/ModeController.h"
 
 #include <FastLED.h>
@@ -82,7 +85,7 @@ public:
 
     // mode
     void                        set_mode                    (const uint8_t new_mode);
-    uint8_t                     get_mode                    () const;
+    uint8_t                     get_mode_id                 () const;
     string                      get_mode_name               () const;
     string                      get_all_modes               () const;
 
@@ -90,6 +93,11 @@ public:
     void                        set_length                  (const uint16_t length);
     uint16_t                    get_length                  () const;
 
+    // led lights
+    void                        set_pixel                   (uint16_t i, std::array<uint8_t, 3> color_rgb);
+    void                        set_all                     (CRGB* new_leds);
+    void                        set_all                     (const uint8_t r, const uint8_t g, const uint8_t b);
+    void                        set_black                   ();
 private:
     CRGB                        leds                        [LED_STRIP_NUM_LEDS_MAX];
 

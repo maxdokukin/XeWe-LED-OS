@@ -14,7 +14,7 @@
 #pragma once
 
 #include "../../Interface/Interface.h"
-//#include "../../Hardware/LedStrip/LedModes/LedMode.h"
+#include "../../Hardware/LedStrip/ModeController/ModeController.h"
 
 #include "HomeSpan.h"
 #include <array>

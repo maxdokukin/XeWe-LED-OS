@@ -17,6 +17,7 @@
 #include <string>
 
 #include "../../Interface/Interface.h"
+#include "../../Hardware/LedStrip/ModeController/ModeController.h"
 
 
 struct AlexaConfig : public ModuleConfig {};

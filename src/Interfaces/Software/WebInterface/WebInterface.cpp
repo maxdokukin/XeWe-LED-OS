@@ -181,12 +181,12 @@ void WebInterface::handleGetStateRequest() {
     if (is_disabled()) return;
 
     char buffer[64];
-    auto rgb = controller.led_strip.get_target_rgb();
+    auto rgb = controller.led_strip.get_rgb();
     snprintf(buffer, sizeof(buffer), "F%02X%02X%02X,%u,%u,%u",
         rgb[0], rgb[1], rgb[2],
         (unsigned)controller.led_strip.get_brightness(),
-        (unsigned)(controller.led_strip.get_target_state() ? 1 : 0),
-        (unsigned)controller.led_strip.get_target_mode_id()
+        (unsigned)(controller.led_strip.get_state() ? 1 : 0),
+        (unsigned)controller.led_strip.get_mode_id()
     );
     httpServer.send(200, "text/plain", buffer);
 }
@@ -194,7 +194,7 @@ void WebInterface::handleGetStateRequest() {
 void WebInterface::handleGetModesRequest() {
     if (is_disabled()) return;
 
-    std::string modes_json = controller.led_strip.get_all_modes_list();
+    std::string modes_json = controller.led_strip.get_all_modes();
     httpServer.send(200, "application/json", modes_json.c_str());
 }
 
@@ -217,10 +217,10 @@ void WebInterface::webSocketEvent(uint8_t num, WStype_t type, uint8_t* payload, 
             IPAddress ip = webSocket.remoteIP(num);
             DBG_PRINTF(WebInterface, "[WSc] Client #%u connected from %s.\n", num, ip.toString().c_str());
             sync_all(
-                controller.led_strip.get_target_rgb(),
+                controller.led_strip.get_rgb(),
                 controller.led_strip.get_brightness(),
-                static_cast<uint8_t>(controller.led_strip.get_target_state() ? 1 : 0),
-                controller.led_strip.get_target_mode_id(),
+                static_cast<uint8_t>(controller.led_strip.get_state() ? 1 : 0),
+                controller.led_strip.get_mode_id(),
                 0
             );
             break;

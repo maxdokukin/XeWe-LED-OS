@@ -99,6 +99,11 @@ public:
         return target_val;
     }
 
+    double get_progress() const {
+
+        return progress;
+    }
+
     bool is_done() const {
         DBG_PRINTLN(AsyncTimer, "-> AsyncTimer::is_done()");
         calculate_progress();
