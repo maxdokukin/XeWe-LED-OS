@@ -1,3 +1,4 @@
+// LedModeController.cpp
 #include "LedModeController.h"
 #include "Mode.h"
 #include "AsyncTimer.h"
@@ -13,6 +14,7 @@ ModeController::ModeController(uint16_t mode_transition_delay) {
         {1, "Fade",    &make_mode_fade},
         {2, "Rainbow", &make_mode_rainbow}
     }};
+    for (auto& px : frame) px = CRGB::Black;
     current_mode = mode_registry[0].make({0, 0, 0});
 }
 
@@ -24,31 +26,30 @@ const ModeController::ModeDesc* ModeController::find_mode(uint8_t id) const {
 }
 
 void ModeController::begin_transition(unique_ptr<Mode> next) {
-    if (transition_timer->is_active())
-        current_mode = std::move(new_mode);
-
-    new_mode = std::move(next);
+    old_mode = std::move(current_mode);
+    current_mode = std::move(next);
     transition_timer->reset();
     transition_timer->initiate();
 }
 
 CRGB* ModeController::loop() {
     if (transition_timer->is_active()) {
-        CRGB frame[led_strip->get_length()];
-        const CRGB* a = previous_mode->loop();
+        const CRGB* a = old_mode->loop();
         const CRGB* b = current_mode->loop();
+        //declare frame buffer here
 
         uint8_t amount = (uint8_t)(transition_timer->get_progress() * 255.0f + 0.5f);
 
         for (size_t i = 0; i < led_strip->get_length(); ++i)
             frame[i] = blend(a[i], b[i], amount);
 
-        if (transition_timer->is_done())
+        if (transition_timer->is_done()) {
             transition_timer->reset();
+            old_mode.reset();
+        }
 
         return frame;
     }
-
     return current_mode->loop();
 }
 

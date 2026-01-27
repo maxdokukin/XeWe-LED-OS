@@ -1,3 +1,4 @@
+// LedModeController.h
 #pragma once
 
 #include <array>
@@ -23,7 +24,7 @@ public:
     array<uint8_t, 3>           get_rgb                     () const;
 
     void                        set_mode                    (const uint8_t new_mode);
-    uint8_t                     get_mode                    () const;
+    uint8_t                     get_mode_id                 () const;
     string                      get_mode_name               () const;
     string                      get_all_modes               () const;
 
@@ -45,8 +46,6 @@ private:
     unique_ptr<Mode>            old_mode;
 
     unique_ptr<AsyncTimer<uint16_t>> transition_timer;
-
-    CRGB                        frame[LED_STRIP_NUM_LEDS_MAX];
 
     const ModeDesc*             find_mode                   (uint8_t id) const;
     void                        begin_transition            (unique_ptr<Mode> next);
