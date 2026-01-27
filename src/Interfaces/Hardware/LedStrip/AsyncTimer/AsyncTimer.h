@@ -106,12 +106,12 @@ public:
         return done;
     }
 
+    bool is_not_done() const {
+        return !is_done();
+    }
+
     bool is_active() const {
-        DBG_PRINTLN(AsyncTimer, "-> AsyncTimer::is_active()");
-        calculate_progress();
-        bool result = initiated && !done;
-        DBG_PRINTF(AsyncTimer, "<- AsyncTimer::is_active() returns: %s\n", result ? "true" : "false");
-        return result;
+        return initiated;
     }
 
     void terminate() {

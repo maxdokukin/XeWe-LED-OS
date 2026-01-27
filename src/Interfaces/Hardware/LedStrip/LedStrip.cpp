@@ -273,7 +273,7 @@ void LedStripNew::begin_routines_common(const ModuleConfig& cfg) {
 }
 
 void LedStripNew::loop() {
-    if (frame_timer->is_active()) return;
+    if (frame_timer->is_not_done()) return;
     frame_timer->reset();
     frame_timer->initiate();
 

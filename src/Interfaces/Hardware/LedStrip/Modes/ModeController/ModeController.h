@@ -40,10 +40,6 @@ private:
     };
 
     static constexpr size_t     MODE_COUNT = 3;
-
-    uint16_t                    mode_transition_delay;
-    uint8_t                     current_mode_id;
-
     <ModeDesc, MODE_COUNT>      mode_registry;
 
     void                        register_modes              ();

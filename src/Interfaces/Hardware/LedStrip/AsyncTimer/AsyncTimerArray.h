@@ -122,13 +122,13 @@ public:
         return done;
     }
 
+    bool is_not_done() const {
+        return !is_done();
+    }
+
     /** True while a transition is in progress. */
     bool is_active() const {
-        DBG_PRINTLN(AsyncTimerArray, "-> AsyncTimerArray::is_active()");
-        calculate_progress();
-        bool result = !done && initiated;
-        DBG_PRINTF(AsyncTimerArray, "<- AsyncTimerArray::is_active() returns: %s\n", result ? "true" : "false");
-        return result;
+        return initiated;
     }
 
     /** Stop without completing (keeps current state). */
