@@ -1,4 +1,4 @@
 https://github.com/FastLED/FastLED
-https://github.com/maxdokukin/xewe-led-espalexa
-https://github.com/HomeSpan/HomeSpan
-https://github.com/Links2004/arduinoWebSockets
+https://github.com/maxdokukin/xewe-led-library-espalexa
+https://github.com/maxdokukin/xewe-led-library-homespan
+https://github.com/maxdokukin/xewe-led-library-websockets
