@@ -1,5 +1,4 @@
 CHIP,LED_PIN_DATA,LED_PIN_CLOCK,_BUILD_NOTES
-c3,2,0,Testing Stand config
 c3,0,9,Led Dock V1 pinout
 c6,14,2,Led Dock V1 pinout
 s3,9,3,Led Dock V1 pinout
@@ -8,7 +7,6 @@ c6,20,19,Led Dock V2 pinout
 s3,13,12,Led Dock V2 pinout
 c3,1,4,Safe C3 pinout
 c3,3,4,Safe C3 pinout
-c3,4,3,Safe C3 pinout
 c3,6,4,Safe C3 pinout
 c3,7,4,Safe C3 pinout
 c3,10,4,Safe C3 pinout
@@ -34,7 +32,6 @@ s3,9,12,Safe S3 pinout
 s3,10,12,Safe S3 pinout
 s3,11,12,Safe S3 pinout
 s3,12,14,Safe S3 pinout
-s3,13,12,Safe S3 pinout
 s3,14,12,Safe S3 pinout
 s3,15,12,Safe S3 pinout
 s3,16,12,Safe S3 pinout
