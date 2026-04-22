@@ -1,1 +1,0 @@
-SuperMini built in aLED (WS2812B)
