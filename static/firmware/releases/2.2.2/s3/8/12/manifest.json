@@ -1,0 +1,13 @@
+{
+  "name": "xewe-led-os",
+  "version": "2.2.2",
+  "new_install_improv_wait_time": 0,
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        { "path": "2.2.2-s3-xewe-led-os.bin", "offset": 0 }
+      ]
+    }
+  ]
+}
