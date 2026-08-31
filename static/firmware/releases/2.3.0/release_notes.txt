@@ -1,0 +1,3 @@
+Migrated to XeWe-OS 2.0 framework.
+Added HomeAssistant support.
+

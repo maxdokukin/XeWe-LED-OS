@@ -1,0 +1,23 @@
+{
+  "type": "c6",
+  "chip_family": "ESP32-C6",
+  "project_name": "xewe-led-os",
+  "version": "2.3.0",
+  "timestamp_param": "2026-08-31T19:11:33Z",
+  "config": {
+    "LED_PIN_CLOCK": 21,
+    "LED_PIN_DATA": 14
+  },
+  "fqbn": "esp32:esp32:esp32c6:CDCOnBoot=cdc,CPUFreq=160,DebugLevel=none,EraseFlash=all,FlashMode=qio,FlashSize=4M,JTAGAdapter=default,PartitionScheme=no_ota,UploadSpeed=921600",
+  "fqbn_extra": "",
+  "compile_time_sec": 79,
+  "artifacts": {
+    "binary_filename": "2.3.0-c6-xewe-led-os.bin",
+    "path_rel_binary": "xewe-led-os/static/firmware/releases/2.3.0/c6/14/21/2.3.0-c6-xewe-led-os.bin",
+    "path_rel_manifest_json": "xewe-led-os/static/firmware/releases/2.3.0/c6/14/21/manifest.json",
+    "path_rel_meta_json": "xewe-led-os/static/firmware/releases/2.3.0/c6/14/21/meta.json",
+    "path_abs_binary": "/Users/user/Codebase/github/xewe-led-os/static/firmware/releases/2.3.0/c6/14/21/2.3.0-c6-xewe-led-os.bin",
+    "path_abs_manifest_json": "/Users/user/Codebase/github/xewe-led-os/static/firmware/releases/2.3.0/c6/14/21/manifest.json",
+    "path_abs_meta_json": "/Users/user/Codebase/github/xewe-led-os/static/firmware/releases/2.3.0/c6/14/21/meta.json"
+  }
+}
